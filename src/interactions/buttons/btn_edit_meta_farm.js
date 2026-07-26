@@ -3,7 +3,15 @@ const { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = req
 
 module.exports = {
     customId: 'btn_edit_meta_farm',
-    async execute(interaction) {
+    // Recebemos dois parâmetros genéricos pra não dar erro de ordem do seu handler
+    async execute(param1, param2) {
+        // Macete: Descobre automaticamente qual dos dois é a interação que tem a função de Modal
+        const interaction = param1?.showModal ? param1 : param2;
+
+        if (!interaction || typeof interaction.showModal !== 'function') {
+            return console.log('❌ [ERRO] O seu interactionCreate.js não está enviando a interação corretamente para os botões.');
+        }
+
         const modal = new ModalBuilder()
             .setCustomId('modal_editar_meta')
             .setTitle('✏️ Editar Item da Meta');

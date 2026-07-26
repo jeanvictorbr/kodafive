@@ -3,7 +3,14 @@ const { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = req
 
 module.exports = {
     customId: 'btn_del_meta_farm',
-    async execute(interaction) {
+    async execute(param1, param2) {
+        // O mesmo macete pra garantir que estamos usando a interação certa
+        const interaction = param1?.showModal ? param1 : param2;
+
+        if (!interaction || typeof interaction.showModal !== 'function') {
+            return console.log('❌ [ERRO] O seu interactionCreate.js não está enviando a interação corretamente para os botões.');
+        }
+
         const modal = new ModalBuilder()
             .setCustomId('modal_del_meta')
             .setTitle('🗑️ Excluir Item da Meta');

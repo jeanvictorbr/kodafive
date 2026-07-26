@@ -1,4 +1,5 @@
 // src/commands/painel/kodafive.js
+const { Routes } = require('discord.js');
 
 module.exports = {
     name: 'kodafive',
@@ -14,54 +15,61 @@ module.exports = {
             });
         }
         
-        // Estrutura de Embed (Design Premium / App Nativo)
-        const embedPrincipal = {
-            color: 0xff0000, // Linha lateral vermelha
-            image: {
-                url: "https://i.imgur.com/kS9wTqN.png" // Substitua pelo link direto do seu banner
-            },
-            title: "💼 QG DO PATRÃO | Central de Gestão",
-            description: "Visão, chefe! O que vamos adiantar hoje? Escolha a fita aí embaixo.\n\n**Status atual:** `Plano Cria (Grátis)`",
-            fields: [
-                { name: "📋 Gestão da Rapaziada", value: "Recrutamento, Ponto, Metas de Farm e RH.", inline: false },
-                { name: "🔫 Arsenal & Baú 💎", value: "`[REQUER VIP]` Auditoria de estoque e caixa 2.", inline: false },
-                { name: "⚖️ Tribunal do Crime", value: "Sistema de multas, cobranças, strikes e XP.", inline: false }
-            ],
-            footer: {
-                text: "KODA STUDIOS | #Tropa • 25/07/2026" // Rodapé cinzinha profissional
-            }
-        };
+        console.log(`[SISTEMA] O chefia ${interaction.user.tag} puxou o painel nativo /kodafive`);
 
-        const componentes = [
+        // JSON Bruto - Usando Container (type 17) para englobar tudo
+        const componentsV2 = [
             {
-                type: 1, // Botoões de ação principais
+                type: 17,
+                accent_color: 16711680, // Vermelho em decimal
                 components: [
-                    { type: 2, style: 2, custom_id: "btn_modulo_recrutamento", label: "Explorar Gestão", emoji: { name: "📋" } },
-                    { type: 2, style: 2, custom_id: "btn_modulo_arsenal", label: "Explorar Arsenal", emoji: { name: "🔫" } },
-                    { type: 2, style: 2, custom_id: "btn_modulo_tribunal", label: "Explorar Tribunal", emoji: { name: "⚖️" } }
-                ]
-            },
-            {
-                type: 1, // Botoões de Paginação
-                components: [
-                    { type: 2, style: 2, custom_id: "page_back", emoji: { name: "⬅️" } },
-                    { type: 2, style: 2, custom_id: "page_indicator", label: "Página 1/2", disabled: true },
-                    { type: 2, style: 2, custom_id: "page_next", emoji: { name: "➡️" } }
-                ]
-            },
-            {
-                type: 1, // Resgatar VIP
-                components: [
-                    { type: 2, style: 3, custom_id: "btn_resgatar_vip", label: "Resgatar Chave VIP", emoji: { name: "🔑" } }
+                    {
+                        type: 12, // MediaGallery para o Banner no topo
+                        items: [
+                            { media: { url: "https://i.ibb.co/68037k9/banner-placeholder.png" } } // COLOQUE SEU LINK AQUI
+                        ]
+                    },
+                    {
+                        type: 10, // TextDisplay para o conteúdo
+                        content: "# 💼 QG DO PATRÃO | Central de Gestão\nVisão, chefe! O que vamos adiantar hoje? Escolha a fita aí embaixo.\n\n**Status atual:** `Plano Cria (Grátis)`\n\n### 📋 Gestão da Rapaziada\nRecrutamento, Ponto, Metas de Farm e RH.\n\n### 🔫 Arsenal & Baú 💎\n`[REQUER VIP]` Auditoria de estoque e caixa 2.\n\n### ⚖️ Tribunal do Crime\nSistema de multas, cobranças, strikes e XP.\n\n*KODA STUDIOS | #Tropa • 25/07/2026*"
+                    },
+                    {
+                        type: 1, // ActionRow dentro do Container (Botões em linha)
+                        components: [
+                            { type: 2, style: 2, custom_id: "btn_modulo_recrutamento", label: "Explorar Gestão", emoji: { name: "📋" } },
+                            { type: 2, style: 2, custom_id: "btn_modulo_arsenal", label: "Explorar Arsenal", emoji: { name: "🔫" } },
+                            { type: 2, style: 2, custom_id: "btn_modulo_tribunal", label: "Explorar Tribunal", emoji: { name: "⚖️" } }
+                        ]
+                    },
+                    {
+                        type: 1, // ActionRow de paginação
+                        components: [
+                            { type: 2, style: 2, custom_id: "page_back", emoji: { name: "⬅️" } },
+                            { type: 2, style: 2, custom_id: "page_indicator", label: "Página 1/2", disabled: true },
+                            { type: 2, style: 2, custom_id: "page_next", emoji: { name: "➡️" } },
+                            { type: 2, style: 3, custom_id: "btn_resgatar_vip", label: "Resgatar Chave VIP", emoji: { name: "🔑" } }
+                        ]
+                    }
                 ]
             }
         ];
 
-        // Usando o nativo do Discord.js agora que saímos do V2 purista
-        await interaction.reply({
-            embeds: [embedPrincipal],
-            components: componentes,
-            ephemeral: true
-        });
+        try {
+            // Bypass REST para garantir que a renderização V2 (flags: 32768) seja forçada
+            await interaction.client.rest.post(
+                Routes.interactionCallback(interaction.id, interaction.token),
+                {
+                    body: {
+                        type: 4, 
+                        data: {
+                            flags: 32832, // 32768 (V2) + 64 (Ephemeral)
+                            components: componentsV2
+                        }
+                    }
+                }
+            );
+        } catch (error) {
+            console.error('[ERRO REST] Falha ao dropar o painel V2 Container:', error);
+        }
     }
 };

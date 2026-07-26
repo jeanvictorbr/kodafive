@@ -1,12 +1,10 @@
 // src/database/db.js
 const { Pool } = require('pg');
 
-// Conexão com o PostgreSQL usando a URL do .env
+// Conexão com o PostgreSQL usando a URL do .env (Sem forçar SSL)
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false } // Importante para rodar na Discloud sem dar erro de certificado
+    connectionString: process.env.DATABASE_URL
 });
-
 // Função que cria as tabelas assim que o bot liga
 async function iniciarBanco() {
     try {

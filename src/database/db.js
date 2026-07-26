@@ -7,6 +7,26 @@ const pool = new Pool({
 
 async function iniciarBanco() {
     try {
+        // Configuração da Meta de Farm da Facção
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS meta_farm_config (
+                guild_id VARCHAR(255) PRIMARY KEY,
+                item_nome VARCHAR(255) DEFAULT 'Dinheiro Sujo',
+                meta_quantidade INT DEFAULT 1000
+            );
+        `);
+
+        // Registro de Entregas de Farm dos Membros
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS entregas_farm (
+                id SERIAL PRIMARY KEY,
+                guild_id VARCHAR(255) NOT NULL,
+                user_id VARCHAR(255) NOT NULL,
+                quantidade INT NOT NULL,
+                data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log('[BANCO] Sistema de Metas de Farm armado!');
         // Injeta a configuração do canal de Bate Ponto
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS canal_ponto_id VARCHAR(255);`);
 

@@ -58,7 +58,7 @@ async function buildPainelRH(interaction) {
                         { type: 2, style: 1, custom_id: "btn_config_painel_visual", label: "Visual do Painel", emoji: { name: "🎨" } },
                         { type: 2, style: 1, custom_id: "btn_config_nome_fac", label: "Nome da Facção", emoji: { name: "🏷️" } },
                         { type: 2, style: 2, custom_id: "btn_dropar_painel_rec", label: "Dropar Painel", emoji: { name: "📦" } },
-                        { type: 2, style: 4, custom_id: "btn_voltar_menu_principal", label: "Voltar", emoji: { name: "🔙" } }
+                        { type: 2, style: 4, custom_id: "btn_voltar_gestao", label: "Voltar", emoji: { name: "🔙" } }
                     ]
                 },
                 { type: 14, spacing: 1, divider: true },

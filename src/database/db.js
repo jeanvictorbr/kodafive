@@ -5,15 +5,17 @@ const { Pool } = require('pg');
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL
 });
+
 // Função que cria as tabelas assim que o bot liga
 async function iniciarBanco() {
     try {
-        // Tabela de Configurações da Facção (Multi-guild)
+        // Tabela de Configurações da Facção (Multi-guild) com nome_faccao
         await pool.query(`
             CREATE TABLE IF NOT EXISTS server_config (
                 guild_id VARCHAR(255) PRIMARY KEY,
                 canal_rh_id VARCHAR(255),
-                cargo_aprovado_id VARCHAR(255)
+                cargo_aprovado_id VARCHAR(255),
+                nome_faccao VARCHAR(100) DEFAULT 'Nossa Facção'
             );
         `);
 
@@ -35,5 +37,5 @@ async function iniciarBanco() {
     }
 }
 
-// O SEGREDO TÁ AQUI: Exportando a pool e a função pro index.js conseguir usar
+// Exportando a pool e a função pro index.js conseguir usar
 module.exports = { pool, iniciarBanco };

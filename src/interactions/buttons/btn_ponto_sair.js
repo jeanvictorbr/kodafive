@@ -33,7 +33,7 @@ module.exports = {
             const horas = Math.floor(diffSegundos / 3600);
             const minutos = Math.floor((diffSegundos % 3600) / 60);
 
-            // Responde o usuário de forma privada (evitando o erro de InteractionAlreadyReplied)
+            // Responde o usuário de forma privada
             await interaction.reply({ content: `🔴 **Serviço finalizado!** Você trabalhou \`${horas}h ${minutos}m\` nesse turno. Relatório enviado pro QG.`, flags: 64 });
 
             // Busca o canal de relatórios configurado no Dashboard
@@ -44,23 +44,37 @@ module.exports = {
             if (canalPontoId) {
                 const avatarUrl = interaction.user.displayAvatarURL({ extension: 'png', size: 256 });
                 
-                // Monta o Embed Profissional Padrão Koda para o canal de texto
-                const embedRelatorio = {
-                    color: 0x3498db, // Azul corporativo
-                    title: `⏱️ Relógio de Ponto | ${nomeFac}`,
-                    description: `O membro encerrou o expediente e a carga horária foi contabilizada com sucesso no sistema.`,
-                    fields: [
-                        { name: "👤 Membro", value: `<@${userId}>`, inline: true },
-                        { name: "⏳ Tempo Trabalhado", value: `\`${horas}h ${minutos}m\``, inline: true },
-                        { name: "🕒 Entrada / Saída", value: `De \`${entradaTime.toLocaleTimeString()}\` até \`${saidaTime.toLocaleTimeString()}\``, inline: false }
-                    ],
-                    thumbnail: { url: avatarUrl },
-                    footer: { text: "KODA STUDIOS • Sistema de Gestão Inteligente" }
-                };
+                // Payload exclusivo Components V2 (Container, Section, TextDisplay e Separator)
+                const relatorioV2 = [
+                    {
+                        type: 17, // Container
+                        accent_color: 16711680, // Vermelho Koda (ou 3447003 para azul corporativo)
+                        components: [
+                            {
+                                type: 9, // Section: Texto na esquerda, Foto do membro na direita
+                                components: [
+                                    { type: 10, content: `# ⏱️ Relógio de Ponto | ${nomeFac}\nO membro encerrou o expediente e a carga horária foi contabilizada com sucesso.` }
+                                ],
+                                accessory: { type: 11, media: { url: avatarUrl } }
+                            },
+                            { type: 14, spacing: 1, divider: true }, // Linha divisória fina
+                            {
+                                type: 10,
+                                content: `👤 **Membro:** <@${userId}>\n⏳ **Tempo Trabalhado:** \`${horas}h ${minutos}m\`\n\n🕒 **Entrada / Saída:**\n> De \`${entradaTime.toLocaleTimeString()}\` até \`${saidaTime.toLocaleTimeString()}\``
+                            },
+                            { type: 14, spacing: 1, divider: true }, // Linha divisória fina
+                            {
+                                type: 10,
+                                content: "*💼 KODA STUDIOS • Sistema de Gestão Inteligente*"
+                            }
+                        ]
+                    }
+                ];
 
                 const canal = client.channels.cache.get(canalPontoId);
                 if (canal) {
-                    await canal.send({ embeds: [embedRelatorio] });
+                    // Envia usando a flag 32768 (IS_COMPONENTS_V2) exigida pelo Discord para containers
+                    await canal.send({ flags: 32768, components: relatorioV2 });
                 }
             }
 

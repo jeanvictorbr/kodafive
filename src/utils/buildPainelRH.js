@@ -18,7 +18,8 @@ async function buildPainelRH(interaction) {
     const canalStatus = conf.canal_rh_id ? `<#${conf.canal_rh_id}>` : '`❌ Não definido`';
     const novatoStatus = conf.cargo_aprovado_id ? `<@&${conf.cargo_aprovado_id}>` : '`❌ Não definido`';
     const recrutadorStatus = conf.cargo_recrutador_id ? `<@&${conf.cargo_recrutador_id}>` : '`❌ Não definido`';
-    const painelStatus = conf.painel_titulo ? '`✅ Customizado`' : '`⚠️ Padrão de Fábrica`';
+    // Antes estava: conf.painel_titulo ? '`✅ Customizado`' : '`⚠️ Padrão de Fábrica`';
+    const painelStatus = conf.painel_titulo ? '`🎨 Customizado`' : '`⚙️ Padrão Koda`';
 
     return [
         {

@@ -7,6 +7,15 @@ const pool = new Pool({
 
 async function iniciarBanco() {
     try {
+        // Tabela de Ranking dos Recrutadores
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS ranking_recrutadores (
+                guild_id VARCHAR(255) NOT NULL,
+                user_id VARCHAR(255) NOT NULL,
+                pontos INT DEFAULT 0,
+                PRIMARY KEY (guild_id, user_id)
+            );
+        `);
         // 1. Cria a base se não existir
         await pool.query(`
             CREATE TABLE IF NOT EXISTS server_config (

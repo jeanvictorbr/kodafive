@@ -17,11 +17,6 @@ module.exports = {
                         type: 18, 
                         label: "Quantidade Meta", 
                         component: { type: 4, custom_id: "input_qtd", style: 1, placeholder: "Ex: 1000", required: true } 
-                    },
-                    { 
-                        type: 18, 
-                        label: "Ciclo (diario, semanal ou mensal)", 
-                        component: { type: 4, custom_id: "input_ciclo", style: 1, value: "semanal", required: true } 
                     }
                 ]
             }

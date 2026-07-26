@@ -26,14 +26,16 @@ async function iniciarBanco() {
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS canal_ponto_id VARCHAR(255);`);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS is_vip BOOLEAN DEFAULT false;`);
 
-        // 2. Sistema Avançado de Metas de Farm (Múltiplos Itens e Ciclos)
+// Configuração geral do ciclo de farm da guilda
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS ciclo_farm VARCHAR(50) DEFAULT 'semanal';`);
+
+        // Tabela de Metas Múltiplas (Com ID sequencial para múltiplos itens)
         await pool.query(`
             CREATE TABLE IF NOT EXISTS meta_farm_config (
                 id SERIAL PRIMARY KEY,
                 guild_id VARCHAR(255) NOT NULL,
                 item_nome VARCHAR(255) NOT NULL,
                 meta_quantidade INT NOT NULL,
-                ciclo VARCHAR(50) DEFAULT 'semanal',
                 criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);

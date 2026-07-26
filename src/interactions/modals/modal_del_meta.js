@@ -5,7 +5,14 @@ const { atualizarVitrineFarm } = require('../../utils/vitrineFarm');
 
 module.exports = {
     customId: 'modal_del_meta',
-    async execute(interaction) {
+    async execute(param1, param2) {
+        // Macete da interação
+        const interaction = param1?.fields ? param1 : param2;
+
+        if (!interaction || !interaction.fields) {
+            return console.log('❌ [ERRO] O interactionCreate.js não enviou a interação certa pro Modal.');
+        }
+
         // Puxa o ID digitado
         const idItem = interaction.fields.getTextInputValue('input_id_meta_del');
 
@@ -42,11 +49,11 @@ module.exports = {
             // 1. Gera os componentes novos sem o item apagado
             const payloadNovo = await buildPainelFarm(interaction);
 
-            // 2. Dá o update limpo na mensagem do discord
+            // 2. Dá o update limpo na mensagem do painel
             await interaction.update({ components: payloadNovo });
 
             // 3. Atualiza a vitrine pública
-            if (atualizarVitrineFarm) {
+            if (typeof atualizarVitrineFarm === 'function') {
                 await atualizarVitrineFarm(interaction.client, interaction.guildId);
             }
 

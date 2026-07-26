@@ -1,11 +1,19 @@
 // src/interactions/modals/modal_editar_meta.js
-const { pool } = require('../../database/db'); // Ajuste o nível das pastas conforme seu projeto
+const { pool } = require('../../database/db'); // Ajuste o nível das pastas conforme sua estrutura
 const { buildPainelFarm } = require('../../utils/buildPainelFarm');
 const { atualizarVitrineFarm } = require('../../utils/vitrineFarm');
 
 module.exports = {
     customId: 'modal_editar_meta',
-    async execute(interaction) {
+    // Recebendo os dois parâmetros pra evitar erro de ordem
+    async execute(param1, param2) {
+        // Macete: Acha a interação de verdade procurando quem tem a propriedade '.fields'
+        const interaction = param1?.fields ? param1 : param2;
+
+        if (!interaction || !interaction.fields) {
+            return console.log('❌ [ERRO] O interactionCreate.js não enviou a interação certa pro Modal.');
+        }
+
         // Puxa os dados que o líder preencheu
         const idItem = interaction.fields.getTextInputValue('input_id_meta');
         const novoNome = interaction.fields.getTextInputValue('input_novo_nome');
@@ -47,15 +55,15 @@ module.exports = {
             // 2. Atualiza a mensagem da interface na mesma hora pro líder (efeito piscou-atualizou)
             await interaction.update({ components: payloadNovo });
 
-            // 3. Atualiza a vitrine pública da rapaziada (se a função existir)
-            if (atualizarVitrineFarm) {
+            // 3. Atualiza a vitrine pública da rapaziada
+            if (typeof atualizarVitrineFarm === 'function') {
                 await atualizarVitrineFarm(interaction.client, interaction.guildId);
             }
 
         } catch (error) {
             console.error('[ERRO] Falha ao editar item da meta:', error);
             if (!interaction.replied && !interaction.deferred) {
-                await interaction.reply({ content: '❌ Erro interno no banco de dados da prefeitura.', ephemeral: true });
+                await interaction.reply({ content: '❌ Erro interno no banco de dados.', ephemeral: true });
             }
         }
     }

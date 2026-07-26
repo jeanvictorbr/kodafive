@@ -1,3 +1,4 @@
+// src/interactions/selects/select_quem_recrutou.js
 const { pool } = require('../../database/db');
 const { Routes } = require('discord.js');
 
@@ -15,10 +16,17 @@ module.exports = {
                 [recrutadorId, userId]
             );
 
-            // 2. Avisa o novato e esconde o menu
-            await interaction.update({ 
-                content: '✅ Ficha finalizada e enviada pro RH. Aguarde o radinho!', 
-                components: [] 
+            // 2. Avisa o novato via REST puro (Bypass V2) para não dar o erro de legacy content
+            const payloadSucesso = [
+                {
+                    type: 17,
+                    accent_color: 65280, // Verde
+                    components: [{ type: 10, content: "✅ **Tudo certo!** Sua ficha foi enviada pro RH. Aguarde o radinho." }]
+                }
+            ];
+
+            await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
+                body: { type: 7, data: { flags: 32832, components: payloadSucesso } }
             });
 
             // 3. Puxa os dados completos pra montar a ficha

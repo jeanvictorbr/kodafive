@@ -25,7 +25,7 @@ module.exports = {
                 components: [
                     {
                         type: 12, // Banner
-                        items: [{ media: { url: "https://i.ibb.co/68037k9/banner-placeholder.png" } }] // Troque pelo seu link
+                        items: [{ media: { url: "https://cdn.discordapp.com/attachments/1470363539314184192/1530819424351813793/standard.gif?ex=6a66f630&is=6a65a4b0&hm=8f1f7add57b331258e91ac0aeb45c24d7a465d313f10f2127dd7c9543d0ee1f9&" } }] // Troque pelo seu link
                     },
                     {
                         type: 10, // Cabeçalho

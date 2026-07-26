@@ -7,20 +7,43 @@ const pool = new Pool({
 
 async function iniciarBanco() {
     try {
-        // Configuração da Meta de Farm da Facção
-// Tabela de Metas Múltiplas com Ciclo de Tempo
+        // 1. Tabela Principal de Configuração do Servidor (Deve vir primeiro por causa das dependências)
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS server_config (
+                guild_id VARCHAR(255) PRIMARY KEY,
+                canal_rh_id VARCHAR(255),
+                cargo_aprovado_id VARCHAR(255)
+            );
+        `);
+
+        // Injeta as colunas novas de configuração com segurança (Migrations)
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS nome_faccao VARCHAR(100) DEFAULT 'Nossa Facção';`);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS cargo_recrutador_id VARCHAR(255);`);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS painel_titulo VARCHAR(255) DEFAULT '📝 Recrutamento da Facção';`);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS painel_desc TEXT DEFAULT 'Visão, novato. Quer fechar com o certo? Clica no botão abaixo, manda tua ficha pro nosso RH e aguarda o radinho.';`);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS painel_banner VARCHAR(255) DEFAULT 'https://i.ibb.co/68037k9/banner-placeholder.png';`);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS painel_rodape VARCHAR(255) DEFAULT 'Sistema de Recrutamento';`);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS canal_ponto_id VARCHAR(255);`);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS is_vip BOOLEAN DEFAULT false;`);
+
+        // 2. Sistema Avançado de Metas de Farm (Múltiplos Itens e Ciclos)
         await pool.query(`
             CREATE TABLE IF NOT EXISTS meta_farm_config (
                 id SERIAL PRIMARY KEY,
                 guild_id VARCHAR(255) NOT NULL,
                 item_nome VARCHAR(255) NOT NULL,
                 meta_quantidade INT NOT NULL,
-                ciclo VARCHAR(50) DEFAULT 'semanal', -- diario, semanal, mensal
+                ciclo VARCHAR(50) DEFAULT 'semanal',
                 criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
 
-        // Tabela de Entregas (vinculada ao item da meta)
+        // Injeções de segurança caso a tabela já existisse sem essas colunas
+        await pool.query(`ALTER TABLE meta_farm_config ADD COLUMN IF NOT EXISTS id SERIAL;`);
+        await pool.query(`ALTER TABLE meta_farm_config ADD COLUMN IF NOT EXISTS ciclo VARCHAR(50) DEFAULT 'semanal';`);
+        await pool.query(`ALTER TABLE meta_farm_config ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;`);
+
+        // Tabela de Entregas de Farm (Vinculada ao ID da meta)
         await pool.query(`
             CREATE TABLE IF NOT EXISTS entregas_farm (
                 id SERIAL PRIMARY KEY,
@@ -28,16 +51,12 @@ async function iniciarBanco() {
                 user_id VARCHAR(255) NOT NULL,
                 meta_id INT REFERENCES meta_farm_config(id) ON DELETE CASCADE,
                 quantidade INT NOT NULL,
-                comprovante_url TEXT, -- Link do print enviado pelo membro
+                comprovante_url TEXT,
                 data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
-        console.log('[BANCO] Sistema Avançado de Metas de Farm estruturado!');
-        console.log('[BANCO] Sistema de Metas de Farm armado!');
-        // Injeta a configuração do canal de Bate Ponto
-        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS canal_ponto_id VARCHAR(255);`);
 
-        // Tabela do Relógio de Ponto
+        // 3. Tabela do Relógio de Ponto
         await pool.query(`
             CREATE TABLE IF NOT EXISTS bate_ponto (
                 id SERIAL PRIMARY KEY,
@@ -48,8 +67,8 @@ async function iniciarBanco() {
                 status VARCHAR(50) DEFAULT 'aberto'
             );
         `);
-        console.log('[BANCO] Sistema de Bate Ponto armado!');
-        // Tabela de Ranking dos Recrutadores
+
+        // 4. Tabela de Ranking dos Recrutadores
         await pool.query(`
             CREATE TABLE IF NOT EXISTS ranking_recrutadores (
                 guild_id VARCHAR(255) NOT NULL,
@@ -58,10 +77,8 @@ async function iniciarBanco() {
                 PRIMARY KEY (guild_id, user_id)
             );
         `);
-        // Injeta a coluna VIP nas configurações do servidor
-        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS is_vip BOOLEAN DEFAULT false;`);
 
-        // Tabela do cofre (Chaves VIP)
+        // 5. Tabela do Cofre (Chaves VIP)
         await pool.query(`
             CREATE TABLE IF NOT EXISTS vip_keys (
                 key VARCHAR(50) PRIMARY KEY,
@@ -71,16 +88,8 @@ async function iniciarBanco() {
                 guild_id VARCHAR(255)
             );
         `);
-        console.log('[BANCO] Sistema VIP e Chaves injetado com sucesso!');
-        // 1. Cria a base se não existir
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS server_config (
-                guild_id VARCHAR(255) PRIMARY KEY,
-                canal_rh_id VARCHAR(255),
-                cargo_aprovado_id VARCHAR(255)
-            );
-        `);
-        
+
+        // 6. Tabela de Recrutamento e Fichas
         await pool.query(`
             CREATE TABLE IF NOT EXISTS recrutamento (
                 id SERIAL PRIMARY KEY,
@@ -91,22 +100,13 @@ async function iniciarBanco() {
             );
         `);
 
-        // 2. Injeta as colunas novas com segurança (Migrations)
-        // Configurações da facção e painel customizável
-        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS nome_faccao VARCHAR(100) DEFAULT 'Nossa Facção';`);
-        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS cargo_recrutador_id VARCHAR(255);`);
-        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS painel_titulo VARCHAR(255) DEFAULT '📝 Recrutamento da Facção';`);
-        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS painel_desc TEXT DEFAULT 'Visão, novato. Quer fechar com o certo? Clica no botão abaixo, manda tua ficha pro nosso RH e aguarda o radinho.';`);
-        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS painel_banner VARCHAR(255) DEFAULT 'https://i.ibb.co/68037k9/banner-placeholder.png';`);
-        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS painel_rodape VARCHAR(255) DEFAULT 'Sistema de Recrutamento';`);
-
-        // Fichas de Recrutamento (Nome RP e Recrutador)
+        // Migrations de Fichas
         await pool.query(`ALTER TABLE recrutamento ADD COLUMN IF NOT EXISTS nome_rp VARCHAR(100);`);
         await pool.query(`ALTER TABLE recrutamento ADD COLUMN IF NOT EXISTS recrutador_id VARCHAR(255);`);
         await pool.query(`ALTER TABLE recrutamento ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'pendente';`);
         await pool.query(`ALTER TABLE recrutamento ADD COLUMN IF NOT EXISTS data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP;`);
 
-        console.log('[BANCO] Banco atualizado! Colunas de Recrutador e Painel injetadas.');
+        console.log('[BANCO] Estrutura completa e atualizada com sucesso no PostgreSQL!');
     } catch (error) {
         console.error('[ERRO] Falha ao atualizar o PostgreSQL:', error);
     }

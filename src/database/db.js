@@ -7,6 +7,21 @@ const pool = new Pool({
 
 async function iniciarBanco() {
     try {
+        // Injeta a configuração do canal de Bate Ponto
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS canal_ponto_id VARCHAR(255);`);
+
+        // Tabela do Relógio de Ponto
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS bate_ponto (
+                id SERIAL PRIMARY KEY,
+                guild_id VARCHAR(255) NOT NULL,
+                user_id VARCHAR(255) NOT NULL,
+                entrada TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                saida TIMESTAMP,
+                status VARCHAR(50) DEFAULT 'aberto'
+            );
+        `);
+        console.log('[BANCO] Sistema de Bate Ponto armado!');
         // Tabela de Ranking dos Recrutadores
         await pool.query(`
             CREATE TABLE IF NOT EXISTS ranking_recrutadores (

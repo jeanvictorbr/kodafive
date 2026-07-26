@@ -29,14 +29,27 @@ async function iniciarBanco() {
 // Configuração geral do ciclo de farm da guilda
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS ciclo_farm VARCHAR(50) DEFAULT 'semanal';`);
 
-        // Tabela de Metas Múltiplas (Com ID sequencial para múltiplos itens)
+// 2. Sistema Avançado de Metas de Farm (Recria a tabela caso estivesse com a chave errada em guild_id)
         await pool.query(`
-            CREATE TABLE IF NOT EXISTS meta_farm_config (
+            DROP TABLE IF EXISTS entregas_farm CASCADE;
+            DROP TABLE IF EXISTS meta_farm_config CASCADE;
+
+            CREATE TABLE meta_farm_config (
                 id SERIAL PRIMARY KEY,
                 guild_id VARCHAR(255) NOT NULL,
                 item_nome VARCHAR(255) NOT NULL,
                 meta_quantidade INT NOT NULL,
                 criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE entregas_farm (
+                id SERIAL PRIMARY KEY,
+                guild_id VARCHAR(255) NOT NULL,
+                user_id VARCHAR(255) NOT NULL,
+                meta_id INT REFERENCES meta_farm_config(id) ON DELETE CASCADE,
+                quantidade INT NOT NULL,
+                comprovante_url TEXT,
+                data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
 

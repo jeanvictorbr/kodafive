@@ -75,7 +75,7 @@ module.exports = async (client, interaction) => {
             return interaction.showModal(modalFac.data);
         }
 
-        // --- GESTÃO CLICOU EM VOLTAR AO MENU PRINCIPAL ---
+        // --- // --- GESTÃO CLICOU EM VOLTAR AO MENU PRINCIPAL ---
         if (customId === 'btn_voltar_menu_principal') {
             const payloadOriginal = [
                 {
@@ -83,18 +83,35 @@ module.exports = async (client, interaction) => {
                     accent_color: 16711680,
                     components: [
                         { type: 12, items: [{ media: { url: "https://i.ibb.co/68037k9/banner-placeholder.png" } }] },
-                        { type: 10, content: "# 💼 QG DO PATRÃO | Central de Gestão\nVisão, chefe! O que vamos adiantar hoje? Escolha a fita aí embaixo.\n\n**Status atual:** `Plano Cria (Grátis)`\n\n### 📋 Gestão da Rapaziada\nRecrutamento, Ponto, Metas de Farm e RH.\n\n### 🔫 Arsenal & Baú 💎\n`[REQUER VIP]` Auditoria de estoque e caixa 2.\n\n### ⚖️ Tribunal do Crime\nSistema de multas, cobranças, strikes e XP.\n\n*KODA STUDIOS | #Tropa • 25/07/2026*" },
-                        { type: 1, components: [
-                            { type: 2, style: 2, custom_id: "btn_modulo_recrutamento", label: "Explorar Gestão", emoji: { name: "📋" } },
-                            { type: 2, style: 2, custom_id: "btn_modulo_arsenal", label: "Explorar Arsenal", emoji: { name: "🔫" } },
-                            { type: 2, style: 2, custom_id: "btn_modulo_tribunal", label: "Explorar Tribunal", emoji: { name: "⚖️" } }
-                        ]},
+                        { type: 10, content: "# 💼 QG DO PATRÃO | Central de Gestão\nVisão, chefe! O que vamos adiantar hoje? Escolha a fita aí embaixo.\n\n**Status atual:** `Plano Cria (Grátis)`" },
+                        { type: 14, spacing: 1, divider: true },
+                        
+                        {
+                            type: 9,
+                            components: [{ type: 10, content: "### 📋 Gestão da Rapaziada\nRecrutamento, Ponto, Metas de Farm e RH." }],
+                            accessory: { type: 2, style: 2, custom_id: "btn_modulo_recrutamento", label: "Explorar" }
+                        },
+                        {
+                            type: 9,
+                            components: [{ type: 10, content: "### 🔫 Arsenal & Baú 💎\n`[REQUER VIP]` Auditoria de estoque e caixa 2." }],
+                            accessory: { type: 2, style: 2, custom_id: "btn_modulo_arsenal", label: "Explorar" }
+                        },
+                        {
+                            type: 9,
+                            components: [{ type: 10, content: "### ⚖️ Tribunal do Crime\nSistema de multas, cobranças, strikes e XP." }],
+                            accessory: { type: 2, style: 2, custom_id: "btn_modulo_tribunal", label: "Explorar" }
+                        },
+                        
+                        { type: 14, spacing: 1, divider: true },
                         { type: 1, components: [
                             { type: 2, style: 2, custom_id: "page_back", emoji: { name: "⬅️" } },
                             { type: 2, style: 2, custom_id: "page_indicator", label: "Página 1/2", disabled: true },
-                            { type: 2, style: 2, custom_id: "page_next", emoji: { name: "➡️" } },
+                            { type: 2, style: 2, custom_id: "page_next", emoji: { name: "➡️" } }
+                        ]},
+                        { type: 1, components: [
                             { type: 2, style: 3, custom_id: "btn_resgatar_vip", label: "Resgatar Chave VIP", emoji: { name: "🔑" } }
-                        ]}
+                        ]},
+                        { type: 10, content: "*KODA STUDIOS | #Tropa • 25/07/2026*" }
                     ]
                 }
             ];

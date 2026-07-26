@@ -1,0 +1,26 @@
+{
+  "name": "kodafive",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeanvictorbr/kodafive.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/jeanvictorbr/kodafive/issues"
+  },
+  "homepage": "https://github.com/jeanvictorbr/kodafive#readme",
+  "dependencies": {
+    "discord.js": "^14.27.0",
+    "dotenv": "^17.4.2",
+    "pg": "^8.22.0"
+  }
+}

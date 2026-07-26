@@ -2,52 +2,124 @@
 const { pool } = require('../database/db');
 
 module.exports = async (client, interaction) => {
-    
-    // ==========================================
-    // 1. TRATAMENTO DE COMANDOS DE BARRA (SLASH)
-    // ==========================================
-    if (interaction.isChatInputCommand()) {
-        const command = client.commands.get(interaction.commandName);
-        if (!command) return;
-
-        try {
-            await command.execute(interaction);
-        } catch (error) {
-            console.error('[ERRO] B.O ao executar o comando:', error);
-            if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ content: 'Deu ruim ao puxar esse comando, avisa a gestão.', ephemeral: true });
-            } else {
-                await interaction.reply({ content: 'Deu ruim ao puxar esse comando, avisa a gestão.', ephemeral: true });
-            }
-        }
-        return; // Retorna pra não conflitar com os debaixo
-    }
 
     // ==========================================
-    // 2. TRATAMENTO DE CLIQUES EM BOTÕES (V2)
+    // NAVEGAÇÃO DOS BOTÕES NO QG DO PATRÃO
     // ==========================================
     if (interaction.isButton()) {
         const { customId } = interaction;
 
-        // --- BOTÃO DO PAINEL PRINCIPAL: EXPLORAR GESTÃO (RECRUTAMENTO) ---
+        // 1. GESTÃO CLICOU PARA EXPLORAR O RH
         if (customId === 'btn_modulo_recrutamento') {
+            const subModuloRH = {
+                flags: 32768,
+                components: [
+                    {
+                        type: 10,
+                        content: "# 📋 SUBMÓDULO: Gestão da Rapaziada\nConfigure a base do seu RH. Selecione o canal onde as fichas vão cair para aprovação e, quando tiver tudo pronto, drope o painel na rua pros novatos preencherem."
+                    },
+                    {
+                        type: 1, // Menu de Seleção de Canal
+                        components: [
+                            {
+                                type: 8, // Channel Select
+                                custom_id: "config_select_canal_rh",
+                                placeholder: "1. Onde as fichas do RH vão cair?",
+                                channel_types: [0] // Só canais de texto
+                            }
+                        ]
+                    },
+                    {
+                        type: 1, // Menu de Seleção de Cargo
+                        components: [
+                            {
+                                type: 6, // Role Select
+                                custom_id: "config_select_cargo_novato",
+                                placeholder: "2. Qual cargo o novato aprovado recebe?"
+                            }
+                        ]
+                    },
+                    {
+                        type: 1, // Botões de Ação do RH
+                        components: [
+                            { type: 2, style: 1, custom_id: "btn_dropar_painel_rec", label: "Dropar Painel Público", emoji: { name: "📦" } },
+                            { type: 2, style: 4, custom_id: "btn_voltar_menu_principal", label: "Voltar ao QG", emoji: { name: "🔙" } }
+                        ]
+                    }
+                ]
+            };
+            // Atualiza a mesma mensagem com a tela do submódulo
+            return interaction.update(subModuloRH);
+        }
+
+        // 2. GESTÃO CLICOU EM VOLTAR AO MENU PRINCIPAL
+        if (customId === 'btn_voltar_menu_principal') {
+            // Recria o payload do kodafive original
+            const payloadOriginal = {
+                flags: 32768, 
+                components: [
+                    {
+                        type: 10,
+                        content: "# 💼 QG DO PATRÃO | Central de Gestão\nVisão, chefe! O que vamos adiantar hoje? Escolha a fita aí embaixo.\n\n**Status atual:** `Plano Cria (Grátis)`\n\n### 📋 Gestão da Rapaziada\nRecrutamento, Ponto, Metas de Farm e RH.\n\n### 🔫 Arsenal & Baú 💎\n`[REQUER VIP]` Auditoria de estoque e caixa 2.\n\n### ⚖️ Tribunal do Crime\nSistema de multas, cobranças, strikes e XP."
+                    },
+                    {
+                        type: 1, 
+                        components: [
+                            { type: 2, style: 2, custom_id: "btn_modulo_recrutamento", label: "Explorar Gestão", emoji: { name: "📋" } },
+                            { type: 2, style: 2, custom_id: "btn_modulo_arsenal", label: "Explorar Arsenal", emoji: { name: "🔫" } },
+                            { type: 2, style: 2, custom_id: "btn_modulo_tribunal", label: "Explorar Tribunal", emoji: { name: "⚖️" } }
+                        ]
+                    },
+                    {
+                        type: 1, 
+                        components: [
+                            { type: 2, style: 2, custom_id: "page_back", emoji: { name: "⬅️" } },
+                            { type: 2, style: 2, custom_id: "page_indicator", label: "Página 1/2", disabled: true },
+                            { type: 2, style: 2, custom_id: "page_next", emoji: { name: "➡️" } },
+                            { type: 2, style: 3, custom_id: "btn_resgatar_vip", label: "Resgatar Chave VIP", emoji: { name: "🔑" } }
+                        ]
+                    }
+                ]
+            };
+            return interaction.update(payloadOriginal);
+        }
+
+        // 3. GESTÃO DROPANDO O PAINEL DE RECRUTAMENTO NA RUA
+        if (customId === 'btn_dropar_painel_rec') {
+            const painelPublico = {
+                flags: 32768,
+                components: [
+                    {
+                        type: 10,
+                        content: "# 📝 Recrutamento da Facção Aberto!\nVisão, novato. Quer fechar com o certo? Clica no botão abaixo, manda tua ficha pro nosso RH e aguarda o radinho. Não adianta floodar."
+                    },
+                    {
+                        type: 1,
+                        components: [
+                            { type: 2, style: 3, custom_id: "btn_abrir_modal_novato", label: "Preencher Ficha", emoji: { name: "✍️" } }
+                        ]
+                    }
+                ]
+            };
+            
+            // Manda o painel no mesmo canal onde a gestão executou o comando
+            await interaction.channel.send(painelPublico);
+            return interaction.reply({ content: 'Painel dropado com sucesso nesse canal, chefe!', ephemeral: true });
+        }
+
+        // 4. NOVATO CLICANDO NO PAINEL PÚBLICO (ABRE O MODAL)
+        if (customId === 'btn_abrir_modal_novato') {
             const modalPayload = {
-                type: 9, // Aciona o MODAL
+                type: 9, 
                 data: {
                     custom_id: "modal_recrutamento_form",
                     title: "Ficha de Recrutamento",
                     components: [
                         {
-                            type: 18, // Label
+                            type: 18, 
                             label: "Qual o seu passaporte na cidade?",
                             component: {
-                                type: 4, // Input de texto
-                                custom_id: "rec_passaporte",
-                                style: 1, // Curto
-                                min_length: 1,
-                                max_length: 10,
-                                placeholder: "Ex: 1532",
-                                required: true
+                                type: 4, custom_id: "rec_passaporte", style: 1, min_length: 1, max_length: 10, placeholder: "Ex: 1532", required: true
                             }
                         },
                         {
@@ -55,13 +127,7 @@ module.exports = async (client, interaction) => {
                             label: "Qual sua experiência no crime?",
                             description: "Manda o papo reto do seu histórico.",
                             component: {
-                                type: 4, 
-                                custom_id: "rec_experiencia",
-                                style: 2, // Parágrafo longo
-                                min_length: 20,
-                                max_length: 1000,
-                                placeholder: "Já rodei por 157, vim da facção X, sou bom de tiro...",
-                                required: true
+                                type: 4, custom_id: "rec_experiencia", style: 2, min_length: 20, max_length: 1000, placeholder: "Já rodei por 157...", required: true
                             }
                         }
                     ]
@@ -69,118 +135,32 @@ module.exports = async (client, interaction) => {
             };
             return interaction.showModal(modalPayload.data);
         }
-
-        // --- BOTÃO DO RH: APROVAR CRIA ---
-        if (customId.startsWith('btn_aprovar_')) {
-            const targetUserId = customId.split('_')[2]; // Pega o ID que a gente atrelou no botão
-
-            try {
-                // Atualiza o banco de dados
-                await pool.query("UPDATE recrutamento SET status = 'aprovado' WHERE user_id = $1 AND status = 'pendente'", [targetUserId]);
-
-                // Edita a mensagem do RH (Muda pra texto e tira os botões)
-                const updatePayload = {
-                    flags: 32768,
-                    components: [
-                        {
-                            type: 10,
-                            content: `# ✅ Ficha Aprovada!\nA ficha do <@${targetUserId}> foi aprovada por <@${interaction.user.id}>.`
-                        }
-                    ]
-                };
-                await interaction.update(updatePayload);
-
-                // Manda DM pro cara
-                const member = await interaction.guild.members.fetch(targetUserId).catch(() => null);
-                if (member) {
-                    await member.send('Visão! Sua ficha foi **APROVADA** pelo RH da facção. Cola na base pra pegar o radinho e o kit iniciante.').catch(() => console.log(`[AVISO] DM fechada do user ${targetUserId}`));
-                }
-            } catch (error) {
-                console.error('[ERRO] Falha ao aprovar novato:', error);
-            }
-            return;
-        }
-
-        // --- BOTÃO DO RH: MANDAR RALAR (REPROVAR) ---
-        if (customId.startsWith('btn_reprovar_')) {
-            const targetUserId = customId.split('_')[2];
-
-            try {
-                // Atualiza o banco de dados
-                await pool.query("UPDATE recrutamento SET status = 'reprovado' WHERE user_id = $1 AND status = 'pendente'", [targetUserId]);
-
-                // Edita a mensagem do RH
-                const updatePayload = {
-                    flags: 32768,
-                    components: [
-                        {
-                            type: 10,
-                            content: `# ❌ Ficha Recusada.\nA ficha do <@${targetUserId}> foi mandada pro lixo por <@${interaction.user.id}>.`
-                        }
-                    ]
-                };
-                await interaction.update(updatePayload);
-
-                // Manda DM pro cara
-                const member = await interaction.guild.members.fetch(targetUserId).catch(() => null);
-                if (member) {
-                    await member.send('Foi mal, chefe. Sua ficha foi **REPROVADA** pela diretoria. Tenta de novo na próxima leva.').catch(() => null);
-                }
-            } catch (error) {
-                console.error('[ERRO] Falha ao reprovar novato:', error);
-            }
-            return;
-        }
     }
 
     // ==========================================
-    // 3. TRATAMENTO DO ENVIO DE MODAL (FORMULÁRIO)
+    // SALVANDO CONFIGURAÇÕES (SELECT MENUS DO SUBMÓDULO)
     // ==========================================
-    if (interaction.isModalSubmit()) {
-        if (interaction.customId === 'modal_recrutamento_form') {
-            const passaporte = interaction.fields.getTextInputValue('rec_passaporte');
-            const experiencia = interaction.fields.getTextInputValue('rec_experiencia');
-            const userId = interaction.user.id;
-            
-            try {
-                // Salva no PostgreSQL
-                await pool.query(
-                    'INSERT INTO recrutamento (user_id, passaporte, experiencia) VALUES ($1, $2, $3)',
-                    [userId, passaporte, experiencia]
-                );
+    if (interaction.isAnySelectMenu()) {
+        const guildId = interaction.guildId;
 
-                // Confirma pro usuário na mesma hora
-                await interaction.reply({ 
-                    content: `Visão, <@${userId}>! Passaporte \`${passaporte}\` registrado no sistema. Aguarda a avaliação da diretoria.`, 
-                    ephemeral: true 
-                });
+        if (interaction.customId === 'config_select_canal_rh') {
+            const canalRhId = interaction.values[0];
+            await pool.query(`
+                INSERT INTO server_config (guild_id, canal_rh_id) 
+                VALUES ($1, $2) ON CONFLICT (guild_id) DO UPDATE SET canal_rh_id = $2
+            `, [guildId, canalRhId]);
 
-                // Manda pro canal de RH
-                const canalRH = client.channels.cache.get(process.env.CANAL_RH_ID); 
-                
-                if (canalRH) {
-                    const hrPayload = {
-                        flags: 32768, // V2 puro
-                        components: [
-                            {
-                                type: 10, // Text Display
-                                content: `# 📋 Nova Ficha na Mesa!\n**Discord:** <@${userId}>\n**Passaporte:** \`${passaporte}\`\n\n### 📝 Histórico no Crime:\n> ${experiencia}`
-                            },
-                            {
-                                type: 1, // Action Row (Botões)
-                                components: [
-                                    { type: 2, style: 3, custom_id: `btn_aprovar_${userId}`, label: "Aprovar Cria", emoji: { name: "✅" } },
-                                    { type: 2, style: 4, custom_id: `btn_reprovar_${userId}`, label: "Mandar Ralar", emoji: { name: "❌" } }
-                                ]
-                            }
-                        ]
-                    };
-                    await canalRH.send(hrPayload);
-                }
-            } catch (error) {
-                console.error('[ERRO] Falha ao injetar recrutamento no banco:', error);
-                await interaction.reply({ content: 'Deu b.o no sistema de dados. Tenta mandar a ficha de novo depois.', ephemeral: true });
-            }
+            return interaction.reply({ content: `✅ Canal de RH setado pra <#${canalRhId}>.`, ephemeral: true });
+        }
+
+        if (interaction.customId === 'config_select_cargo_novato') {
+            const cargoId = interaction.values[0];
+            await pool.query(`
+                INSERT INTO server_config (guild_id, cargo_aprovado_id) 
+                VALUES ($1, $2) ON CONFLICT (guild_id) DO UPDATE SET cargo_aprovado_id = $2
+            `, [guildId, cargoId]); // Obs: Lembra de adicionar cargo_aprovado_id na tabela do banco!
+
+            return interaction.reply({ content: `✅ Cargo de aprovado setado pra <@&${cargoId}>.`, ephemeral: true });
         }
     }
 };

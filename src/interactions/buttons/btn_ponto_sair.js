@@ -1,6 +1,5 @@
 // src/interactions/buttons/btn_ponto_sair.js
 const { pool } = require('../../database/db');
-const { Routes } = require('discord.js');
 
 module.exports = {
     customId: 'btn_ponto_sair',
@@ -34,7 +33,8 @@ module.exports = {
             const horas = Math.floor(diffSegundos / 3600);
             const minutos = Math.floor((diffSegundos % 3600) / 60);
 
-            await interaction.reply({ content: `🔴 **Serviço finalizado!** Você trabaou \`${horas}h ${minutos}m\` nesse turno. Relatório enviado pro QG.`, flags: 64 });
+            // Responde o usuário de forma privada (evitando o erro de InteractionAlreadyReplied)
+            await interaction.reply({ content: `🔴 **Serviço finalizado!** Você trabalhou \`${horas}h ${minutos}m\` nesse turno. Relatório enviado pro QG.`, flags: 64 });
 
             // Busca o canal de relatórios configurado no Dashboard
             const config = await pool.query('SELECT canal_ponto_id, nome_faccao FROM server_config WHERE guild_id = $1', [guildId]);
@@ -43,31 +43,32 @@ module.exports = {
 
             if (canalPontoId) {
                 const avatarUrl = interaction.user.displayAvatarURL({ extension: 'png', size: 256 });
-                const relatorioPayload = [
-                    {
-                        type: 17,
-                        accent_color: 255, // Azul corporativo / Relatório
-                        components: [
-                            {
-                                type: 9,
-                                components: [
-                                    { type: 10, content: `# ⏱️ Relatório de Ponto | ${nomeFac}\n**Membro:** <@${userId}>\n**Carga Horária:** \`${horas}h ${minutos}m\`\n\n*Turno encerrado e contabilizado no sistema.*` }
-                                ],
-                                accessory: { type: 11, media: { url: avatarUrl } }
-                            }
-                        ]
-                    }
-                ];
+                
+                // Monta o Embed Profissional Padrão Koda para o canal de texto
+                const embedRelatorio = {
+                    color: 0x3498db, // Azul corporativo
+                    title: `⏱️ Relógio de Ponto | ${nomeFac}`,
+                    description: `O membro encerrou o expediente e a carga horária foi contabilizada com sucesso no sistema.`,
+                    fields: [
+                        { name: "👤 Membro", value: `<@${userId}>`, inline: true },
+                        { name: "⏳ Tempo Trabalhado", value: `\`${horas}h ${minutos}m\``, inline: true },
+                        { name: "🕒 Entrada / Saída", value: `De \`${entradaTime.toLocaleTimeString()}\` até \`${saidaTime.toLocaleTimeString()}\``, inline: false }
+                    ],
+                    thumbnail: { url: avatarUrl },
+                    footer: { text: "KODA STUDIOS • Sistema de Gestão Inteligente" }
+                };
 
                 const canal = client.channels.cache.get(canalPontoId);
                 if (canal) {
-                    await canal.send({ components: relatorioPayload });
+                    await canal.send({ embeds: [embedRelatorio] });
                 }
             }
 
         } catch (error) {
             console.error('[ERRO] Falha ao finalizar ponto:', error);
-            await interaction.reply({ content: 'Deu ruim ao registrar sua saída.', flags: 64 });
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.reply({ content: 'Deu ruim ao registrar sua saída.', flags: 64 });
+            }
         }
     }
 };

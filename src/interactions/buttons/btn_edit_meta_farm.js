@@ -1,0 +1,43 @@
+// src/interactions/buttons/btn_edit_meta_farm.js
+const { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
+
+module.exports = {
+    customId: 'btn_edit_meta_farm',
+    async execute(interaction) {
+        const modal = new ModalBuilder()
+            .setCustomId('modal_editar_meta')
+            .setTitle('✏️ Editar Item da Meta');
+
+        // Pede o ID do item
+        const inputId = new TextInputBuilder()
+            .setCustomId('input_id_meta')
+            .setLabel('ID do Item (veja na lista acima)')
+            .setPlaceholder('Ex: 1')
+            .setStyle(TextInputStyle.Short)
+            .setRequired(true);
+
+        // Pede o novo nome
+        const inputNome = new TextInputBuilder()
+            .setCustomId('input_novo_nome')
+            .setLabel('Novo Nome do Item')
+            .setPlaceholder('Ex: Maconha')
+            .setStyle(TextInputStyle.Short)
+            .setRequired(true);
+
+        // Pede a nova quantidade
+        const inputQtd = new TextInputBuilder()
+            .setCustomId('input_nova_qtd')
+            .setLabel('Nova Quantidade Global')
+            .setPlaceholder('Ex: 15000')
+            .setStyle(TextInputStyle.Short)
+            .setRequired(true);
+
+        modal.addComponents(
+            new ActionRowBuilder().addComponents(inputId),
+            new ActionRowBuilder().addComponents(inputNome),
+            new ActionRowBuilder().addComponents(inputQtd)
+        );
+
+        await interaction.showModal(modal);
+    }
+};

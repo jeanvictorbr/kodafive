@@ -1,4 +1,6 @@
 const { pool } = require('../../database/db');
+const { Routes } = require('discord.js');
+const { buildPainelRH } = require('../../utils/buildPainelRH');
 
 module.exports = {
     customId: 'modal_nome_fac',
@@ -8,6 +10,9 @@ module.exports = {
             `INSERT INTO server_config (guild_id, nome_faccao) VALUES ($1, $2) ON CONFLICT (guild_id) DO UPDATE SET nome_faccao = $2`, 
             [interaction.guildId, novoNome]
         );
-        await interaction.reply({ content: `✅ Identidade visual atualizada! O bot vai chamar sua firma de **${novoNome}**.`, flags: 64 });
+        const subModuloRH = await buildPainelRH(interaction);
+        await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
+            body: { type: 7, data: { flags: 32832, components: subModuloRH } }
+        });
     }
 };

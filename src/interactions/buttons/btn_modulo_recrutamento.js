@@ -1,85 +1,12 @@
-// src/interactions/buttons/btn_modulo_recrutamento.js
-const { pool } = require('../../database/db');
 const { Routes } = require('discord.js');
+const { buildPainelRH } = require('../../utils/buildPainelRH');
 
 module.exports = {
     customId: 'btn_modulo_recrutamento',
     async execute(client, interaction) {
-        // Puxa as configs do banco pra mostrar em tempo real no Dashboard
-        const config = await pool.query('SELECT * FROM server_config WHERE guild_id = $1', [interaction.guildId]);
-        const conf = config.rows[0] || {};
-
-        // Puxa a foto de quem clicou no botão
-        const avatarUrl = interaction.user.displayAvatarURL({ extension: 'png', size: 256 });
-
-        // Valores padrão pros select menus
-        const canalRh = conf.canal_rh_id ? [{ id: conf.canal_rh_id, type: 'channel' }] : [];
-        const cargoNovato = conf.cargo_aprovado_id ? [{ id: conf.cargo_aprovado_id, type: 'role' }] : [];
-        const cargoRecrutador = conf.cargo_recrutador_id ? [{ id: conf.cargo_recrutador_id, type: 'role' }] : [];
-        const nomeFac = conf.nome_faccao || 'Ainda não definida';
-
-        // Lógica para mostrar o que tá configurado e o que não tá em tempo real
-        const canalStatus = conf.canal_rh_id ? `<#${conf.canal_rh_id}>` : '`❌ Não definido`';
-        const novatoStatus = conf.cargo_aprovado_id ? `<@&${conf.cargo_aprovado_id}>` : '`❌ Não definido`';
-        const recrutadorStatus = conf.cargo_recrutador_id ? `<@&${conf.cargo_recrutador_id}>` : '`❌ Não definido`';
-        const painelStatus = conf.painel_titulo ? '`✅ Customizado`' : '`⚠️ Padrão de Fábrica`';
-
-        const subModuloRH = [
-            {
-                type: 17, 
-                accent_color: 16711680,
-                components: [
-                    {
-                        type: 9, // Section: Texto na esquerda, Foto (thumbnail) na direita
-                        components: [
-                            {
-                                type: 10,
-                                content: "# 📋 SUBMÓDULO: Gestão da Rapaziada\nConfigure quem recruta, o canal de aprovação e o design do painel público."
-                            }
-                        ],
-                        accessory: { type: 11, media: { url: avatarUrl } }
-                    },
-                    {
-                        type: 10,
-                        // Aqui mostramos o dashboard em tempo real
-                        content: `**🏢 Facção:** \`${nomeFac}\`\n\n### ⚙️ Status do Sistema\n> **Canal do RH:** ${canalStatus}\n> **Cargo de Aprovado:** ${novatoStatus}\n> **Cargo Recrutador:** ${recrutadorStatus}\n> **Visual do Painel:** ${painelStatus}`
-                    },
-                    { 
-                        type: 1, 
-                        components: [{ type: 8, custom_id: "config_select_canal_rh", placeholder: "1. Canal do RH (Aprovações)", channel_types: [0], default_values: canalRh }] 
-                    },
-                    { 
-                        type: 1, 
-                        components: [{ type: 6, custom_id: "config_select_cargo_novato", placeholder: "2. Cargo de Aprovado (Novato)", default_values: cargoNovato }] 
-                    },
-                    { 
-                        type: 1, 
-                        components: [{ type: 6, custom_id: "config_select_cargo_recrutador", placeholder: "3. Cargo de Recrutador (Staff)", default_values: cargoRecrutador }] 
-                    },
-                    {
-                        type: 1, 
-                        components: [
-                            { type: 2, style: 1, custom_id: "btn_config_painel_visual", label: "Visual do Painel", emoji: { name: "🎨" } },
-                            { type: 2, style: 1, custom_id: "btn_config_nome_fac", label: "Nome da Facção", emoji: { name: "🏷️" } },
-                            { type: 2, style: 2, custom_id: "btn_dropar_painel_rec", label: "Dropar Painel", emoji: { name: "📦" } },
-                            { type: 2, style: 4, custom_id: "btn_voltar_menu_principal", label: "Voltar", emoji: { name: "🔙" } }
-                        ]
-                    },
-                    { type: 14, spacing: 1, divider: true },
-                    {
-                        type: 10,
-                        content: "💼 *KODA STUDIOS • Sistema de Gestão Inteligente*"
-                    }
-                ]
-            }
-        ];
-
-        try {
-            await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
-                body: { type: 7, data: { flags: 32832, components: subModuloRH } }
-            });
-        } catch (error) {
-            console.error('[ERRO REST] Falha ao atualizar submódulo:', error);
-        }
+        const subModuloRH = await buildPainelRH(interaction);
+        await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
+            body: { type: 7, data: { flags: 32832, components: subModuloRH } }
+        });
     }
 };

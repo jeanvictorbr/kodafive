@@ -16,6 +16,20 @@ async function iniciarBanco() {
                 PRIMARY KEY (guild_id, user_id)
             );
         `);
+        // Injeta a coluna VIP nas configurações do servidor
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS is_vip BOOLEAN DEFAULT false;`);
+
+        // Tabela do cofre (Chaves VIP)
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS vip_keys (
+                key VARCHAR(50) PRIMARY KEY,
+                gerada_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                usada BOOLEAN DEFAULT false,
+                usada_por VARCHAR(255),
+                guild_id VARCHAR(255)
+            );
+        `);
+        console.log('[BANCO] Sistema VIP e Chaves injetado com sucesso!');
         // 1. Cria a base se não existir
         await pool.query(`
             CREATE TABLE IF NOT EXISTS server_config (

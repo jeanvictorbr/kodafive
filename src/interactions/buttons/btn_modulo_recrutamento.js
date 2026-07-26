@@ -9,11 +9,20 @@ module.exports = {
         const config = await pool.query('SELECT * FROM server_config WHERE guild_id = $1', [interaction.guildId]);
         const conf = config.rows[0] || {};
 
-        // Monta os valores padrão (se já tiver configurado, o Discord já mostra preenchido)
+        // Puxa a foto de quem clicou no botão
+        const avatarUrl = interaction.user.displayAvatarURL({ extension: 'png', size: 256 });
+
+        // Valores padrão pros select menus
         const canalRh = conf.canal_rh_id ? [{ id: conf.canal_rh_id, type: 'channel' }] : [];
         const cargoNovato = conf.cargo_aprovado_id ? [{ id: conf.cargo_aprovado_id, type: 'role' }] : [];
         const cargoRecrutador = conf.cargo_recrutador_id ? [{ id: conf.cargo_recrutador_id, type: 'role' }] : [];
         const nomeFac = conf.nome_faccao || 'Ainda não definida';
+
+        // Lógica para mostrar o que tá configurado e o que não tá em tempo real
+        const canalStatus = conf.canal_rh_id ? `<#${conf.canal_rh_id}>` : '`❌ Não definido`';
+        const novatoStatus = conf.cargo_aprovado_id ? `<@&${conf.cargo_aprovado_id}>` : '`❌ Não definido`';
+        const recrutadorStatus = conf.cargo_recrutador_id ? `<@&${conf.cargo_recrutador_id}>` : '`❌ Não definido`';
+        const painelStatus = conf.painel_titulo ? '`✅ Customizado`' : '`⚠️ Padrão de Fábrica`';
 
         const subModuloRH = [
             {
@@ -21,8 +30,19 @@ module.exports = {
                 accent_color: 16711680,
                 components: [
                     {
+                        type: 9, // Section: Texto na esquerda, Foto (thumbnail) na direita
+                        components: [
+                            {
+                                type: 10,
+                                content: "# 📋 SUBMÓDULO: Gestão da Rapaziada\nConfigure quem recruta, o canal de aprovação e o design do painel público."
+                            }
+                        ],
+                        accessory: { type: 11, media: { url: avatarUrl } }
+                    },
+                    {
                         type: 10,
-                        content: `# 📋 SUBMÓDULO: Gestão da Rapaziada\nConfigure quem recruta, o canal de aprovação e o design do painel público.\n\n**🏢 Facção:** \`${nomeFac}\``
+                        // Aqui mostramos o dashboard em tempo real
+                        content: `**🏢 Facção:** \`${nomeFac}\`\n\n### ⚙️ Status do Sistema\n> **Canal do RH:** ${canalStatus}\n> **Cargo de Aprovado:** ${novatoStatus}\n> **Cargo Recrutador:** ${recrutadorStatus}\n> **Visual do Painel:** ${painelStatus}`
                     },
                     { 
                         type: 1, 
@@ -45,17 +65,21 @@ module.exports = {
                             { type: 2, style: 4, custom_id: "btn_voltar_menu_principal", label: "Voltar", emoji: { name: "🔙" } }
                         ]
                     },
-                    { type: 14, spacing: 1, divider: true }, // Separador
+                    { type: 14, spacing: 1, divider: true },
                     {
                         type: 10,
-                        content: "*💼 KODA STUDIOS • Sistema de Gestão Inteligente*" // Rodapé da gestão
+                        content: "💼 *KODA STUDIOS • Sistema de Gestão Inteligente*"
                     }
                 ]
             }
         ];
 
-        await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
-            body: { type: 7, data: { flags: 32832, components: subModuloRH } }
-        });
+        try {
+            await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
+                body: { type: 7, data: { flags: 32832, components: subModuloRH } }
+            });
+        } catch (error) {
+            console.error('[ERRO REST] Falha ao atualizar submódulo:', error);
+        }
     }
 };

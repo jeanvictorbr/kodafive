@@ -16,15 +16,15 @@ module.exports = {
             if (canal) {
                 try {
                     const msg = await canal.messages.fetch(config.plantao_msg_id);
-                    const { embeds, components } = await buildPlantaoPublico(interaction.guildId);
-                    await msg.edit({ embeds, components });
+                    const painel = await buildPlantaoPublico(interaction.guildId);
+                    await msg.edit({ flags: 32768, components: painel });
                 } catch {}
             }
         }
 
-        const painel = await buildPainelPlantao(interaction);
+        const adminPainel = await buildPainelPlantao(interaction);
         await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
-            body: { type: 7, data: { flags: 32832, components: painel } }
+            body: { type: 7, data: { flags: 32832, components: adminPainel } }
         });
     }
 };

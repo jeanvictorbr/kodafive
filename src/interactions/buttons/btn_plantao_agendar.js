@@ -1,14 +1,9 @@
 const { Routes } = require('discord.js');
+const { BLOCOS } = require('../../utils/buildPainelPlantaoPublico');
 
 module.exports = {
-    customId: 'btn_plantao_iniciar',
+    customId: 'btn_plantao_agendar',
     async execute(client, interaction) {
-        const cargos = [
-            { label: '🏛️ Liderança', value: 'Liderança', description: 'Coordenação geral' },
-            { label: '📋 Recrutador', value: 'Recrutador', description: 'Responsável por recrutas' },
-            { label: '⚖️ Gerente', value: 'Gerente', description: 'Gestão de membros' },
-        ];
-
         await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
             body: {
                 type: 7, data: {
@@ -16,15 +11,19 @@ module.exports = {
                     components: [{
                         type: 17, accent_color: 3447003,
                         components: [
-                            { type: 10, content: "### ✅ Qual função tu vai exercer agora?" },
+                            { type: 10, content: "### 📅 Qual horário tu vai cobrir?\nEscolhe o bloco de 3h que tu vai ficar na atividade." },
                             { type: 14, spacing: 1, divider: true },
                             {
                                 type: 1,
                                 components: [{
                                     type: 3,
-                                    custom_id: 'select_plantao_cargo',
-                                    placeholder: 'Escolhe a função',
-                                    options: cargos
+                                    custom_id: 'select_plantao_horario',
+                                    placeholder: 'Escolhe o horário',
+                                    options: BLOCOS.map(b => ({
+                                        label: b.label,
+                                        value: `${b.inicio}_${b.fim}`,
+                                        description: `Cobrir das ${b.inicio} às ${b.fim}`
+                                    }))
                                 }]
                             }
                         ]

@@ -247,6 +247,10 @@ async function iniciarBanco() {
             );
         `);
         await pool.query(`ALTER TABLE plantao ADD COLUMN IF NOT EXISTS cargo VARCHAR(100) NOT NULL DEFAULT 'Recrutador';`);
+        await pool.query(`ALTER TABLE plantao ADD COLUMN IF NOT EXISTS tipo VARCHAR(20) DEFAULT 'agora';`);
+        await pool.query(`ALTER TABLE plantao ADD COLUMN IF NOT EXISTS data_plantao DATE;`);
+        await pool.query(`ALTER TABLE plantao ADD COLUMN IF NOT EXISTS hora_inicio VARCHAR(5);`);
+        await pool.query(`ALTER TABLE plantao ADD COLUMN IF NOT EXISTS hora_fim VARCHAR(5);`);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS canal_plantao_id VARCHAR(255);`);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS cargo_plantao_id VARCHAR(255);`);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS plantao_banner VARCHAR(500) DEFAULT 'https://i.ibb.co/68037k9/banner-placeholder.png';`);

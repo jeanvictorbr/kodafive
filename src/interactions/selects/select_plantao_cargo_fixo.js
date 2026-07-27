@@ -3,15 +3,21 @@ const { Routes } = require('discord.js');
 const { buildPlantaoPublico } = require('../../utils/buildPainelPlantaoPublico');
 
 module.exports = {
-    customId: 'select_plantao_cargo',
+    customId: 'select_plantao_cargo_fixo',
     async execute(client, interaction) {
         const cargo = interaction.values[0];
         const guildId = interaction.guildId;
         const userId = interaction.user.id;
+        const hoje = new Date().toISOString().split('T')[0];
+
+        const match = interaction.customId.match(/select_plantao_cargo_fixo_(\d{2}:\d{2})_(\d{2}:\d{2})/);
+        if (!match) return;
+        const horaInicio = match[1];
+        const horaFim = match[2];
 
         await pool.query(
-            'INSERT INTO plantao (guild_id, user_id, cargo, tipo, inicio, status) VALUES ($1, $2, $3, $4, NOW(), $5)',
-            [guildId, userId, cargo, 'agora', 'ativo']
+            'INSERT INTO plantao (guild_id, user_id, cargo, tipo, data_plantao, hora_inicio, hora_fim, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+            [guildId, userId, cargo, 'agendado', hoje, horaInicio, horaFim, 'agendado']
         );
 
         const config = await pool.query(
@@ -35,9 +41,9 @@ module.exports = {
             body: { type: 7, data: { flags: 64, components: [{
                 type: 17, accent_color: 4437377,
                 components: [
-                    { type: 10, content: `# ✅ Suave!\n<@${userId}> tá na ativa como **${cargo}** desde agora.` },
+                    { type: 10, content: `# ✅ Agendado!\n<@${userId}> vai cobrir **${horaInicio} às ${horaFim}** como **${cargo}** hoje.` },
                     { type: 14, spacing: 1, divider: true },
-                    { type: 10, content: "Quando quiser sair, é só voltar no painel e clicar em **🔴 Encerrar**." }
+                    { type: 10, content: "Chegou o horário? Volta no painel e clica em **✅ Assumir Agora** pra ativar." }
                 ]
             }] } }
         });

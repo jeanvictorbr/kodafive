@@ -59,6 +59,7 @@ module.exports = async (client, interaction) => {
     if (customId && customId.startsWith('modal_tribunal_advertencia_')) customId = 'modal_tribunal_advertencia';
     if (customId && customId.startsWith('modal_tribunal_suspensao_')) customId = 'modal_tribunal_suspensao';
     if (customId && customId.startsWith('modal_add_tag_')) customId = 'modal_add_tag';
+    if (customId && customId.startsWith('select_plantao_cargo_fixo_')) customId = 'select_plantao_cargo_fixo';
     if (customId && customId.startsWith('page_back_disabled')) return;
     if (customId && customId.startsWith('page_next_disabled')) return;
     if (customId && customId.startsWith('page_back_p')) customId = 'page_back';

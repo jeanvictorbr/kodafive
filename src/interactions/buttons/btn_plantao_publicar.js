@@ -26,17 +26,17 @@ module.exports = {
             });
         }
 
-        const { embeds, components } = await buildPlantaoPublico(interaction.guildId);
-        const msg = await canal.send({ embeds, components });
+        const painel = await buildPlantaoPublico(interaction.guildId);
+        const msg = await canal.send({ flags: 32768, components: painel });
 
         await pool.query(
             'UPDATE server_config SET plantao_msg_id = $1, plantao_msg_canal_id = $2 WHERE guild_id = $3',
             [msg.id, canalId, interaction.guildId]
         );
 
-        const painel = await buildPainelPlantao(interaction);
+        const adminPainel = await buildPainelPlantao(interaction);
         await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
-            body: { type: 7, data: { flags: 32832, components: painel } }
+            body: { type: 7, data: { flags: 32832, components: adminPainel } }
         });
     }
 };

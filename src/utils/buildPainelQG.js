@@ -28,8 +28,8 @@ async function buildPainelQG(interaction, pagina = 1) {
         },
         {
             type: 9,
-            components: [{ type: 10, content: "### 🔫 Arsenal & Baú 💎\n`[REQUER VIP]` Auditoria de estoque e caixa 2." }],
-            accessory: { type: 2, style: 2, custom_id: "btn_modulo_arsenal", label: "Explorar" }
+            components: [{ type: 10, content: "### 🔫 Arsenal & Baú 💎\n🚧 *Em desenvolvimento*" }],
+            accessory: { type: 2, style: 2, custom_id: "btn_modulo_arsenal", label: "Em Breve", disabled: true }
         },
         {
             type: 9,
@@ -96,7 +96,7 @@ async function buildPainelQG(interaction, pagina = 1) {
                 { type: 2, style: 2, custom_id: "btn_importar_backup", label: "Restore", emoji: { name: "📂" } }
             ]
         },
-        { type: 10, content: "💼 *KODA STUDIOS • Sistema de Gestão Inteligente*" }
+        { type: 10, content: "*💼 KODA STUDIOS • v0.0.1-beta • Sistema de Gestão Inteligente*" }
     ];
 
     return [{ type: 17, accent_color: 16711680, components: componentes }];

@@ -8,15 +8,23 @@ function removerTag(nome) {
 }
 
 async function getMembers(guild) {
-    if (guild.members.cache.size > 0) {
+    if (guild.members.cache.size > 50) {
         return guild.members.cache;
     }
-    try {
-        return await guild.members.fetch();
-    } catch (error) {
-        console.error('[TAG] Erro ao buscar membros via gateway, usando cache:', error.message);
-        return guild.members.cache;
+    let attempts = 0;
+    while (attempts < 3) {
+        try {
+            return await guild.members.fetch();
+        } catch (error) {
+            attempts++;
+            if (error.code === 50013) throw error;
+            const retryAfter = error.retry_after || 5;
+            console.error(`[TAG] Rate limit ao buscar membros (${attempts}/3), aguardando ${retryAfter}s...`);
+            await new Promise(r => setTimeout(r, retryAfter * 1000 + 500));
+        }
     }
+    console.error('[TAG] Falha ao buscar todos os membros após 3 tentativas, usando cache parcial.');
+    return guild.members.cache;
 }
 
 async function aplicarTag(client, guildId, userId) {
@@ -72,7 +80,7 @@ async function aplicarTag(client, guildId, userId) {
         return { aplicado: false, motivo: 'ja_atualizado' };
     } catch (error) {
         if (error.code === 50013) return { aplicado: false, motivo: 'sem_permissao' };
-        console.error('[TAG] Erro em aplicarTag:', error);
+        console.error('[TAG] Erro em aplicarTag:', error.message);
         return { aplicado: false, motivo: 'erro' };
     }
 }
@@ -80,10 +88,12 @@ async function aplicarTag(client, guildId, userId) {
 async function sincronizarTodos(client, interaction) {
     const guild = interaction.guild;
     const members = await getMembers(guild);
+
     let atualizados = 0;
     let erros = 0;
     let semPermissao = 0;
     let ignorados = 0;
+    let total = members.size;
 
     for (const [id, member] of members) {
         if (member.user.bot) { ignorados++; continue; }
@@ -94,7 +104,7 @@ async function sincronizarTodos(client, interaction) {
         await new Promise(r => setTimeout(r, 150));
     }
 
-    return { atualizados, erros, semPermissao, ignorados, total: members.size };
+    return { atualizados, erros, semPermissao, ignorados, total };
 }
 
 module.exports = { aplicarTag, sincronizarTodos, removerTag, getMembers };

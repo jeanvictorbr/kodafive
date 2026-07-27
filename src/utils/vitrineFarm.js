@@ -30,7 +30,7 @@ async function atualizarVitrineFarm(client, guildId) {
             listaMetas = "> *Nenhuma meta ativa no momento. Aguarde a diretoria.*";
         } else {
             for (const m of metas.rows) {
-                listaMetas += `> **• ${m.item_nome}:** \`${m.meta_quantidade.toLocaleString()} un\`\n`;
+                listaMetas += `> **• [ID ${m.id}] ${m.item_nome}:** \`${m.meta_quantidade.toLocaleString()} un\`\n`;
             }
         }
 

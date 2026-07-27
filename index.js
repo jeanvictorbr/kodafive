@@ -5,6 +5,7 @@ const path = require('path');
 const { iniciarBanco } = require('./src/database/db.js');
 const { iniciarSchedulerFarm } = require('./src/utils/farmScheduler');
 const { iniciarSchedulerExpurgo } = require('./src/utils/expurgoScheduler');
+const { iniciarSchedulerVip } = require('./src/utils/vipScheduler');
 
 // Configurando o cliente inquebrável com os Intents necessários
 const client = new Client({
@@ -47,6 +48,8 @@ iniciarSchedulerFarm(client);
 console.log('[SISTEMA] Motor de reset de metas ativado!');
 iniciarSchedulerExpurgo(client);
 console.log('[SISTEMA] Motor de expurgo automático ativado!');
+iniciarSchedulerVip(client);
+console.log('[SISTEMA] Motor de expiração VIP ativado!');
 
 // ==========================================
 // 📂 CARREGADOR DE EVENTOS (Event Handler)

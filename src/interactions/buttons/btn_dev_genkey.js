@@ -7,8 +7,18 @@ module.exports = {
             components: [
                 {
                     type: 18,
-                    label: 'Quantidade (1-50)',
+                    label: 'Quantidade de keys (1-50)',
                     component: { type: 4, custom_id: "input_qtd", style: 1, value: '1', placeholder: "1", required: true }
+                },
+                {
+                    type: 18,
+                    label: 'Dias de duração (0 = vitalício)',
+                    component: { type: 4, custom_id: "input_dias", style: 1, value: '30', placeholder: "30", required: true }
+                },
+                {
+                    type: 18,
+                    label: 'Máximo de usos por key (1-999)',
+                    component: { type: 4, custom_id: "input_usos", style: 1, value: '1', placeholder: "1", required: true }
                 }
             ]
         });

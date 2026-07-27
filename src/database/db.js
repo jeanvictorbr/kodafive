@@ -198,6 +198,11 @@ async function iniciarBanco() {
 
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS cargo_alerta_id VARCHAR(255);`);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS faq_ativo BOOLEAN DEFAULT true;`);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS vip_expira_em TIMESTAMP;`);
+
+        await pool.query(`ALTER TABLE vip_keys ADD COLUMN IF NOT EXISTS dias_validade INT DEFAULT 0;`);
+        await pool.query(`ALTER TABLE vip_keys ADD COLUMN IF NOT EXISTS usos_max INT DEFAULT 1;`);
+        await pool.query(`ALTER TABLE vip_keys ADD COLUMN IF NOT EXISTS usos_atual INT DEFAULT 0;`);
 
         // 13. Sugestões
         await pool.query(`

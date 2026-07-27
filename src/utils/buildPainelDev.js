@@ -11,7 +11,7 @@ async function buildPainelDev(client, pagina = 1, guildId = null) {
     const totalGuilds = client.guilds.cache.size;
     const vips = (await pool.query('SELECT COUNT(*)::int as total FROM server_config WHERE is_vip = true')).rows[0].total;
     const keysTotal = (await pool.query('SELECT COUNT(*)::int as total FROM vip_keys')).rows[0].total;
-    const keysUsadas = (await pool.query('SELECT COUNT(*)::int as total FROM vip_keys WHERE usada = true')).rows[0].total;
+    const keysUsadas = (await pool.query('SELECT COUNT(*)::int as total FROM vip_keys WHERE usos_atual >= usos_max')).rows[0].total;
     const keysDisponiveis = keysTotal - keysUsadas;
 
     const porPagina = 10;
@@ -20,12 +20,19 @@ async function buildPainelDev(client, pagina = 1, guildId = null) {
     const inicio = (pagina - 1) * porPagina;
     const pageGuilds = guilds.slice(inicio, inicio + porPagina);
 
-    const vipGuilds = (await pool.query('SELECT guild_id FROM server_config WHERE is_vip = true')).rows.map(r => r.guild_id);
+    const vipData = (await pool.query('SELECT guild_id, vip_expira_em FROM server_config WHERE is_vip = true')).rows;
+    const vipMap = {};
+    for (const v of vipData) vipMap[v.guild_id] = v.vip_expira_em;
 
     let listaServidores = '';
     for (const g of pageGuilds) {
-        const isVip = vipGuilds.includes(g.id);
-        listaServidores += `> ${isVip ? '💎' : '⬜'} **${g.name}** — ${g.memberCount} membros\n`;
+        const isVip = g.id in vipMap;
+        const expira = vipMap[g.id];
+        let expiraTexto = '';
+        if (isVip && expira) {
+            expiraTexto = ` — expira <t:${Math.floor(new Date(expira).getTime() / 1000)}:R>`;
+        }
+        listaServidores += `> ${isVip ? '💎' : '⬜'} **${g.name}** — ${g.memberCount} membros${expiraTexto}\n`;
     }
     if (!listaServidores) listaServidores = '> *Nenhum servidor encontrado.*';
 
@@ -43,7 +50,7 @@ async function buildPainelDev(client, pagina = 1, guildId = null) {
             { type: 14, spacing: 1, divider: true },
             {
                 type: 10,
-                content: `### 📊 Visão Geral\n> 🌐 Servidores: **${totalGuilds}**\n> 💎 VIPs: **${vips}**\n> 🔑 Keys: **${keysDisponiveis}** disponíveis / **${keysUsadas}** usadas`
+                content: `### 📊 Visão Geral\n> 🌐 Servidores: **${totalGuilds}**\n> 💎 VIPs: **${vips}**\n> 🔑 Keys: **${keysDisponiveis}** disponíveis / **${keysUsadas}** esgotadas`
             },
             { type: 14, spacing: 1, divider: true },
             {
@@ -63,8 +70,8 @@ async function buildPainelDev(client, pagina = 1, guildId = null) {
             {
                 type: 1,
                 components: [
-                    { type: 2, style: 3, custom_id: `btn_dev_vip_all_grant`, label: "💎 Liberar VIP p/ Todos", emoji: { name: "💎" } },
-                    { type: 2, style: 4, custom_id: `btn_dev_vip_all_revoke`, label: "⛔ Remover VIP de Todos", emoji: { name: "⛔" } }
+                    { type: 2, style: 3, custom_id: "btn_dev_vip_all_grant", label: "💎 Liberar VIP p/ Todos", emoji: { name: "💎" } },
+                    { type: 2, style: 4, custom_id: "btn_dev_vip_all_revoke", label: "⛔ Remover VIP de Todos", emoji: { name: "⛔" } }
                 ]
             },
             {
@@ -82,8 +89,7 @@ async function buildPainelDevServer(client, guildId) {
     const guild = client.guilds.cache.get(guildId);
     if (!guild) {
         return [{
-            type: 17,
-            accent_color: 16711680,
+            type: 17, accent_color: 16711680,
             components: [
                 { type: 10, content: "# ❌ Servidor não encontrado\nO bot não está mais neste servidor." },
                 { type: 1, components: [{ type: 2, style: 4, custom_id: "btn_dev_back", label: "Voltar", emoji: { name: "🔙" } }] }
@@ -91,8 +97,9 @@ async function buildPainelDevServer(client, guildId) {
         }];
     }
 
-    const config = await pool.query('SELECT is_vip FROM server_config WHERE guild_id = $1', [guildId]);
-    const isVip = config.rows[0]?.is_vip || false;
+    const config = (await pool.query('SELECT is_vip, vip_expira_em FROM server_config WHERE guild_id = $1', [guildId])).rows[0] || {};
+    const isVip = config.is_vip || false;
+    const vipExpira = config.vip_expira_em;
 
     let ownerTag = 'Desconhecido';
     try {
@@ -104,6 +111,11 @@ async function buildPainelDevServer(client, guildId) {
 
     const membros = (await pool.query('SELECT COUNT(*)::int as total FROM membros WHERE guild_id = $1', [guildId])).rows[0].total;
     const sugestoes = (await pool.query('SELECT COUNT(*)::int as total FROM sugestoes WHERE guild_id = $1', [guildId])).rows[0].total;
+
+    let vipTexto = isVip ? '✅ Sim' : '❌ Não';
+    if (isVip && vipExpira) {
+        vipTexto += ` — expira <t:${Math.floor(new Date(vipExpira).getTime() / 1000)}:R>`;
+    }
 
     return [{
         type: 17,
@@ -117,7 +129,7 @@ async function buildPainelDevServer(client, guildId) {
             { type: 14, spacing: 1, divider: true },
             {
                 type: 10,
-                content: `### 📊 Informações\n> 💎 **VIP:** ${isVip ? '✅ Sim' : '❌ Não'}\n> 📋 Membros no banco: **${membros}**\n> 💡 Sugestões: **${sugestoes}**\n> 📅 Criado em: ${formatDate(guild.createdAt)}`
+                content: `### 📊 Informações\n> 💎 **VIP:** ${vipTexto}\n> 📋 Membros no banco: **${membros}**\n> 💡 Sugestões: **${sugestoes}**\n> 📅 Criado em: ${formatDate(guild.createdAt)}`
             },
             { type: 14, spacing: 1, divider: true },
             {
@@ -144,17 +156,19 @@ async function buildPainelDevKeys(client) {
         'SELECT * FROM vip_keys ORDER BY gerada_em DESC LIMIT 20'
     );
 
+    const stats = (await pool.query(
+        "SELECT COUNT(*)::int as total, SUM(CASE WHEN usos_atual >= usos_max THEN 1 ELSE 0 END)::int as usadas FROM vip_keys"
+    )).rows[0];
+
     let listaKeys = '';
     for (const k of keys.rows) {
-        const status = k.usada ? `✅ Usada` : '⬜ Disponível';
+        const usos = `${k.usos_atual}/${k.usos_max}`;
+        const duracao = k.dias_validade > 0 ? `${k.dias_validade}d` : '∞';
+        const status = k.usos_atual >= k.usos_max ? '🔴 Esgotada' : '🟢 Disponível';
         const data = formatDate(k.gerada_em);
-        listaKeys += `> \`${k.key}\` — ${status} — ${data}\n`;
+        listaKeys += `> \`${k.key}\` — ${status} — ${duracao} — usos: ${usos} — ${data}\n`;
     }
     if (!listaKeys) listaKeys = '> *Nenhuma key cadastrada.*';
-
-    const stats = (await pool.query(
-        'SELECT COUNT(*)::int as total, SUM(CASE WHEN usada THEN 1 ELSE 0 END)::int as usadas FROM vip_keys'
-    )).rows[0];
 
     return [{
         type: 17,
@@ -164,7 +178,7 @@ async function buildPainelDevKeys(client) {
             { type: 14, spacing: 1, divider: true },
             {
                 type: 10,
-                content: `### 📊 Estatísticas\n> 🔑 Total: **${stats.total}**\n> ✅ Usadas: **${stats.usadas}**\n> ⬜ Disponíveis: **${stats.total - stats.usadas}**`
+                content: `### 📊 Estatísticas\n> 🔑 Total: **${stats.total}**\n> 🟢 Disponíveis: **${stats.total - stats.usadas}**\n> 🔴 Esgotadas: **${stats.usadas}**`
             },
             { type: 14, spacing: 1, divider: true },
             { type: 10, content: `### 📋 Últimas Keys\n${listaKeys}` },

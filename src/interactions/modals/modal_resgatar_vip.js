@@ -1,4 +1,3 @@
-// src/interactions/modals/modal_resgatar_vip.js
 const { pool } = require('../../database/db');
 
 module.exports = {
@@ -8,7 +7,6 @@ module.exports = {
         const guildId = interaction.guildId;
 
         try {
-            // Busca a chave no cofre
             const result = await pool.query('SELECT * FROM vip_keys WHERE key = $1', [keyDigitada]);
             const keyData = result.rows[0];
 
@@ -16,19 +14,36 @@ module.exports = {
                 return interaction.reply({ content: '❌ **Chave inválida.** Tem certeza que digitou o código certo, chefe?', flags: 64 });
             }
 
-            if (keyData.usada) {
-                return interaction.reply({ content: '❌ **Chave queimada!** Esse código já foi ativado em outro servidor.', flags: 64 });
+            if (keyData.usos_atual >= keyData.usos_max) {
+                return interaction.reply({ content: '❌ **Chave esgotada!** Essa key já atingiu o limite de usos.', flags: 64 });
             }
 
-            // Ativa o VIP do servidor
-            await pool.query('UPDATE server_config SET is_vip = true WHERE guild_id = $1', [guildId]);
-            
-            // Queima a chave pra não usarem de novo
-            await pool.query('UPDATE vip_keys SET usada = true, usada_por = $1, guild_id = $2 WHERE key = $3', [interaction.user.id, guildId, keyDigitada]);
+            // Atualiza uso da key
+            await pool.query(
+                'UPDATE vip_keys SET usos_atual = usos_atual + 1, usada_por = $1, guild_id = $2 WHERE key = $3',
+                [interaction.user.id, guildId, keyDigitada]
+            );
 
-            await interaction.reply({ 
-                content: `💎 **MÁXIMO RESPEITO! O VIP FOI ATIVADO!**\n\nTodos os módulos do **Plano Patrão** (Arsenal, Baú, Tribunal) estão liberados pra você.\nClica em "Voltar" ou manda o \`/kodafive\` de novo para recarregar o painel.`, 
-                flags: 64 
+            // Calcula expiração se tiver dias de validade
+            let duracaoTexto = '';
+            if (keyData.dias_validade > 0) {
+                const expiraEm = new Date(Date.now() + keyData.dias_validade * 86400000);
+                await pool.query(
+                    'UPDATE server_config SET is_vip = true, vip_expira_em = $1 WHERE guild_id = $2',
+                    [expiraEm, guildId]
+                );
+                duracaoTexto = `\n📅 **Expira em:** <t:${Math.floor(expiraEm.getTime() / 1000)}:R>`;
+            } else {
+                await pool.query(
+                    'UPDATE server_config SET is_vip = true, vip_expira_em = NULL WHERE guild_id = $1',
+                    [guildId]
+                );
+                duracaoTexto = '\n♾️ **Duração:** Vitalícia';
+            }
+
+            await interaction.reply({
+                content: `💎 **MÁXIMO RESPEITO! O VIP FOI ATIVADO!**${duracaoTexto}\n\nTodos os módulos **VIP** estão liberados.\nManda o \`/kodafive\` de novo pra recarregar o painel.`,
+                flags: 64
             });
 
         } catch (error) {

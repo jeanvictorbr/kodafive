@@ -38,6 +38,9 @@ module.exports = async (client, interaction) => {
     // Ajuste para IDs dinâmicos (ex: btn_aprovar_123456 -> pega só btn_aprovar)
     if (customId && customId.startsWith('btn_aprovar_')) customId = 'btn_aprovar';
     if (customId && customId.startsWith('btn_reprovar_')) customId = 'btn_reprovar';
+    if (customId && customId.startsWith('modal_tribunal_multa_')) customId = 'modal_tribunal_multa';
+    if (customId && customId.startsWith('modal_tribunal_advertencia_')) customId = 'modal_tribunal_advertencia';
+    if (customId && customId.startsWith('modal_tribunal_suspensao_')) customId = 'modal_tribunal_suspensao';
 
     const interactionHandler = interactions.get(customId);
 

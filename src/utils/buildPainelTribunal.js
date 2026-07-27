@@ -4,11 +4,16 @@ const { totalPorTipo } = require('./condutaHelper');
 async function buildPainelTribunal(interaction) {
     const guildId = interaction.guildId;
 
-    const [totalMultas, totalAdvertencias, totalSuspensoes] = await Promise.all([
+    const [totalMultas, totalAdvertencias, totalSuspensoes, serverConf] = await Promise.all([
         totalPorTipo(guildId, 'multa'),
         totalPorTipo(guildId, 'advertencia'),
-        totalPorTipo(guildId, 'suspensao', true)
+        totalPorTipo(guildId, 'suspensao', true),
+        pool.query('SELECT canal_log_tribunal_id FROM server_config WHERE guild_id = $1', [guildId])
     ]);
+
+    const canalLog = serverConf.rows[0]?.canal_log_tribunal_id;
+    const canalLogStatus = canalLog ? `<#${canalLog}>` : '`❌ Não definido`';
+    const canalLogDefault = canalLog ? [{ id: canalLog, type: 'channel' }] : [];
 
     const avatarUrl = interaction.user.displayAvatarURL({ extension: 'png', size: 256 });
 
@@ -30,6 +35,8 @@ async function buildPainelTribunal(interaction) {
                     content: `### 📊 Status da Disciplina\n> **Multas Aplicadas:** \`${totalMultas}\`\n> **Advertências:** \`${totalAdvertencias}\`\n> **Suspensões Ativas:** \`${totalSuspensoes}\``
                 },
                 { type: 14, spacing: 1, divider: true },
+                { type: 1, components: [{ type: 8, custom_id: "config_select_canal_log_tribunal", placeholder: "Canal de Logs do Tribunal", channel_types: [0], default_values: canalLogDefault }] },
+                { type: 14, spacing: 1, divider: true },
                 {
                     type: 1,
                     components: [
@@ -46,6 +53,8 @@ async function buildPainelTribunal(interaction) {
                         { type: 2, style: 4, custom_id: "btn_voltar_menu_principal", label: "Voltar ao QG", emoji: { name: "🔙" } }
                     ]
                 },
+                { type: 14, spacing: 1, divider: true },
+                { type: 10, content: `> **Canal de Logs:** ${canalLogStatus}` },
                 { type: 14, spacing: 1, divider: true },
                 { type: 10, content: "*💼 KODA STUDIOS • Sistema de Gestão Inteligente*" }
             ]

@@ -24,26 +24,49 @@ module.exports = {
                 [interaction.guildId, roleId, tag]
             );
 
-            const painel = await buildPainelTags(interaction);
-
             await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
                 body: {
-                    type: 7,
-                    data: { flags: 32832, components: painel }
+                    type: 4,
+                    data: { flags: 32832, components: [
+                        {
+                            type: 17,
+                            accent_color: 65280,
+                            components: [
+                                { type: 10, content: `✅ Tag **${tag}** configurada! Atualizando membros...` }
+                            ]
+                        }
+                    ]}
                 }
             });
 
             const members = await interaction.guild.members.fetch();
+            let atualizados = 0;
             for (const [id, member] of members) {
                 if (member.user.bot) continue;
                 if (member.roles.cache.has(roleId)) {
-                    aplicarTag(client, interaction.guildId, id);
+                    const r = await aplicarTag(client, interaction.guildId, id);
+                    if (r.aplicado) atualizados++;
                 }
             }
 
+            try {
+                const painel = await buildPainelTags(interaction);
+                await client.rest.patch(
+                    `/webhooks/${interaction.applicationId}/${interaction.token}/messages/@original`,
+                    { body: { flags: 32832, components: painel } }
+                );
+            } catch (_) {}
+
         } catch (error) {
             console.error('[TAG] Erro ao salvar tag:', error);
-            await interaction.reply({ content: '❌ Erro ao salvar tag no banco.', flags: 64 });
+            try {
+                await client.rest.patch(
+                    `/webhooks/${interaction.applicationId}/${interaction.token}/messages/@original`,
+                    { body: { content: '❌ Erro ao salvar tag. Verifique os logs.', flags: 64 } }
+                );
+            } catch (_) {
+                await interaction.reply({ content: '❌ Erro ao salvar tag.', flags: 64 }).catch(() => {});
+            }
         }
     }
 };

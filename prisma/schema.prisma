@@ -1,0 +1,125 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --------------------------------------------------------
+// 1. CONFIGURAÇÕES GERAIS DA FACÇÃO
+// --------------------------------------------------------
+model ServerConfig {
+  guild_id            String   @id @db.VarChar(255)
+  canal_rh_id         String?  @db.VarChar(255)
+  cargo_aprovado_id   String?  @db.VarChar(255)
+  
+  // Customização da Facção
+  nome_faccao         String?  @default("Nossa Facção") @db.VarChar(100)
+  cargo_recrutador_id String?  @db.VarChar(255)
+  painel_titulo       String?  @default("📝 Recrutamento da Facção") @db.VarChar(255)
+  painel_desc         String?  @default("Visão, novato. Quer fechar com o certo? Clica no botão abaixo, manda tua ficha pro nosso RH e aguarda o radinho.")
+  painel_banner       String?  @default("https://i.ibb.co/68037k9/banner-placeholder.png") @db.VarChar(255)
+  painel_rodape       String?  @default("Sistema de Recrutamento") @db.VarChar(255)
+  
+  // Bate Ponto e VIP
+  canal_ponto_id      String?  @db.VarChar(255)
+  is_vip              Boolean? @default(false)
+  
+  // Ciclo Global de Farm (diario, semanal, mensal)
+  ciclo_farm          String?  @default("semanal") @db.VarChar(50)
+
+  @@map("server_config")
+}
+
+// --------------------------------------------------------
+// 2. SISTEMA AVANÇADO DE METAS DE FARM
+// --------------------------------------------------------
+model MetaFarmConfig {
+  id              Int            @id @default(autoincrement())
+  guild_id        String         @db.VarChar(255)
+  item_nome       String         @db.VarChar(255)
+  meta_quantidade Int
+  criado_em       DateTime?      @default(now())
+  
+  // Relação com as entregas
+  entregas        EntregasFarm[]
+
+  @@map("meta_farm_config")
+}
+
+model EntregasFarm {
+  id              Int             @id @default(autoincrement())
+  guild_id        String          @db.VarChar(255)
+  user_id         String          @db.VarChar(255)
+  
+  // Chave estrangeira ligando ao item da meta
+  meta_id         Int?
+  meta            MetaFarmConfig? @relation(fields: [meta_id], references: [id], onDelete: Cascade)
+  
+  quantidade      Int
+  comprovante_url String?         @db.Text
+  data_registro   DateTime?       @default(now())
+
+  @@map("entregas_farm")
+}
+
+// --------------------------------------------------------
+// 3. RELÓGIO DE BATE PONTO
+// --------------------------------------------------------
+model BatePonto {
+  id       Int       @id @default(autoincrement())
+  guild_id String    @db.VarChar(255)
+  user_id  String    @db.VarChar(255)
+  entrada  DateTime? @default(now())
+  saida    DateTime?
+  status   String?   @default("aberto") @db.VarChar(50)
+
+  @@map("bate_ponto")
+}
+
+// --------------------------------------------------------
+// 4. RANKING DE RECRUTADORES
+// --------------------------------------------------------
+model RankingRecrutadores {
+  guild_id String @db.VarChar(255)
+  user_id  String @db.VarChar(255)
+  pontos   Int?   @default(0)
+
+  // Chave primária composta
+  @@id([guild_id, user_id])
+  @@map("ranking_recrutadores")
+}
+
+// --------------------------------------------------------
+// 5. SISTEMA VIP E CHAVES
+// --------------------------------------------------------
+model VipKeys {
+  key       String    @id @db.VarChar(50)
+  gerada_em DateTime? @default(now())
+  usada     Boolean?  @default(false)
+  usada_por String?   @db.VarChar(255)
+  guild_id  String?   @db.VarChar(255)
+
+  @@map("vip_keys")
+}
+
+// --------------------------------------------------------
+// 6. FICHAS DE RECRUTAMENTO DO RH
+// --------------------------------------------------------
+model Recrutamento {
+  id            Int       @id @default(autoincrement())
+  guild_id      String    @db.VarChar(255)
+  user_id       String    @db.VarChar(255)
+  passaporte    String    @db.VarChar(50)
+  experiencia   String    @db.Text
+  nome_rp       String?   @db.VarChar(100)
+  recrutador_id String?   @db.VarChar(255)
+  status        String?   @default("pendente") @db.VarChar(50)
+  data_registro DateTime? @default(now())
+
+  @@map("recrutamento")
+}

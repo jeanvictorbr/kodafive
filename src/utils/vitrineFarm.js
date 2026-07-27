@@ -5,7 +5,7 @@ async function atualizarVitrineFarm(client, guildId) {
     try {
         // 1. PUXA DO BANCO DE DADOS REAL (NADA DE MEMÓRIA RAM)
         const query = await pool.query(
-            'SELECT canal_vitrine_id, msg_vitrine_id, meta_atual, meta_total, item_nome, ciclo FROM farm_config WHERE guild_id = $1',
+            'SELECT canal_vitrine_id, msg_vitrine_id, meta_atual, meta_total, item_nome, ciclo FROM meta_farm_config WHERE guild_id = $1',
             [guildId]
         );
 

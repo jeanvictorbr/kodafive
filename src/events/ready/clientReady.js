@@ -12,6 +12,10 @@ module.exports = async (client) => {
             description: 'Abre o QG do Patrão | Central de Gestão'
         },
         {
+            name: 'dev',
+            description: '[DEV] Central de Controle do Bot'
+        },
+        {
             name: 'Dossiê',
             type: 2
         },

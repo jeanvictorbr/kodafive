@@ -45,6 +45,9 @@ module.exports = async (client, interaction) => {
     let customId = interaction.customId;
     
     // Ajuste para IDs dinâmicos (ex: btn_aprovar_123456 -> pega só btn_aprovar)
+    if (customId && customId.startsWith('btn_dev_vip_grant_')) customId = 'btn_dev_vip_grant';
+    if (customId && customId.startsWith('btn_dev_vip_revoke_')) customId = 'btn_dev_vip_revoke';
+    if (customId && customId.startsWith('btn_dev_pag_')) customId = 'btn_dev_pag';
     if (customId && customId.startsWith('btn_sug_aprovar_')) customId = 'btn_sug_aprovar';
     if (customId && customId.startsWith('btn_sug_recusar_')) customId = 'btn_sug_recusar';
     if (customId && customId.startsWith('btn_sug_analisar_')) customId = 'btn_sug_analisar';

@@ -3,13 +3,9 @@ const { Routes } = require('discord.js');
 const { buildPainelSugestoes } = require('../../utils/buildPainelSugestoes');
 
 module.exports = {
-    customId: 'modal_config_canal_analise',
+    customId: 'select_canal_analise',
     async execute(client, interaction) {
-        const channelId = interaction.fields.getTextInputValue('input_channel_id').trim();
-
-        if (!interaction.guild.channels.cache.has(channelId)) {
-            return interaction.reply({ content: '❌ Canal não encontrado neste servidor.', flags: 64 });
-        }
+        const channelId = interaction.values[0];
 
         await pool.query(
             `INSERT INTO config_sugestao (guild_id, canal_analise_id) VALUES ($1, $2)

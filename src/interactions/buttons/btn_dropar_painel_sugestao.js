@@ -6,13 +6,18 @@ module.exports = {
     async execute(client, interaction) {
         try {
             const painel = await buildPainelPublicoSugestoes(interaction);
-            await client.rest.post(Routes.channelMessages(interaction.channelId), {
-                body: { components: painel }
+
+            // Defer primeiro pra depois editar com V2 (única forma de mandar V2 pra canal normal)
+            await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
+                body: { type: 5 } // DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE
             });
-            await interaction.reply({ content: '✅ Painel de sugestões dropado no canal!', flags: 64 });
+
+            await client.rest.patch(
+                `/webhooks/${interaction.applicationId}/${interaction.token}/messages/@original`,
+                { body: { components: painel } }
+            );
         } catch (error) {
             console.error('[SUGESTAO] Erro ao dropar painel:', error);
-            await interaction.reply({ content: '❌ Erro ao dropar painel.', flags: 64 });
         }
     }
 };

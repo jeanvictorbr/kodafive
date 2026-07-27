@@ -15,27 +15,21 @@ module.exports = {
 
         await pool.query('UPDATE sugestoes SET status = $1 WHERE id = $2', ['analise', sugId]);
 
+        const content = `# 💡 Sugestão #${sug.id}\n> 👤 **Autor:** <@${sug.user_id}>\n\n### ${sug.titulo}\n${sug.descricao}\n\n**Status:** 🔍 **Em Análise** — por ${interaction.user}`;
+
         await client.rest.patch(Routes.channelMessage(interaction.channelId, sug.mensagem_analise_id), {
             body: {
-                components: [{
-                    type: 17,
-                    accent_color: 16753920,
-                    components: [
-                        { type: 10, content: `# 💡 Sugestão #${sug.id}\n> 👤 **Autor:** <@${sug.user_id}>\n\n### ${sug.titulo}\n${sug.descricao}` },
-                        { type: 14, spacing: 1, divider: true },
-                        { type: 10, content: `**Status:** 🔍 **Em Análise**\n*Em análise por ${interaction.user}*` },
-                        { type: 14, spacing: 1, divider: true },
-                        {
-                            type: 1,
-                            components: [
-                                { type: 2, style: 3, custom_id: `btn_aprovar_sugestao_${sugId}`, label: "Aprovar", emoji: { name: "✅" } },
-                                { type: 2, style: 4, custom_id: `btn_recusar_sugestao_${sugId}`, label: "Recusar", emoji: { name: "❌" } },
-                                { type: 2, style: 1, custom_id: `btn_analisar_sugestao_${sugId}`, label: "Analisando", disabled: true, emoji: { name: "🔍" } }
-                            ]
-                        },
-                        { type: 10, content: "*💼 KODA STUDIOS • Sistema de Sugestões*" }
-                    ]
-                }]
+                content: content,
+                components: [
+                    {
+                        type: 1,
+                        components: [
+                            { type: 2, style: 3, custom_id: `btn_aprovar_sugestao_${sugId}`, label: "Aprovar", emoji: { name: "✅" } },
+                            { type: 2, style: 4, custom_id: `btn_recusar_sugestao_${sugId}`, label: "Recusar", emoji: { name: "❌" } },
+                            { type: 2, style: 1, custom_id: `btn_analisar_sugestao_${sugId}`, label: "Analisando", disabled: true, emoji: { name: "🔍" } }
+                        ]
+                    }
+                ]
             }
         }).catch(() => {});
 

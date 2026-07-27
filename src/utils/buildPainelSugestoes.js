@@ -10,6 +10,12 @@ async function buildPainelSugestoes(interaction) {
         ? `<#${config.canal_analise_id}>`
         : '*Nenhum canal configurado*';
 
+    const bannerPreview = config?.banner_url
+        ? `[![](${config.banner_url})](${config.banner_url})`
+        : '*Nenhum banner configurado*';
+
+    const descPreview = config?.descricao || '*Nenhuma descrição configurada*';
+
     const stats = (await pool.query(
         'SELECT status, COUNT(*)::int as total FROM sugestoes WHERE guild_id = $1 GROUP BY status',
         [interaction.guildId]
@@ -37,7 +43,12 @@ async function buildPainelSugestoes(interaction) {
                 { type: 14, spacing: 1, divider: true },
                 {
                     type: 10,
-                    content: `### 📋 Configuração\n> **Canal de Análise:** ${canalAnalise}\n> As sugestões são enviadas neste canal para votação da galera.`
+                    content: `### 📋 Configuração\n> **Canal de Análise:** ${canalAnalise}\n> As sugestões são enviadas neste canal para a galera discutir.`
+                },
+                { type: 14, spacing: 1, divider: true },
+                {
+                    type: 10,
+                    content: `### 🎨 Visual do Painel Público\n> **Banner:**\n${bannerPreview}\n\n> **Descrição:** ${descPreview}`
                 },
                 { type: 14, spacing: 1, divider: true },
                 {
@@ -49,7 +60,13 @@ async function buildPainelSugestoes(interaction) {
                     type: 1,
                     components: [
                         { type: 2, style: 2, custom_id: "btn_config_canal_analise", label: "Canal de Análise", emoji: { name: "📢" } },
-                        { type: 2, style: 3, custom_id: "btn_dropar_painel_sugestao", label: "Dropar Público", emoji: { name: "📦" } }
+                        { type: 2, style: 2, custom_id: "btn_config_visual_sugestao", label: "Visual do Painel", emoji: { name: "🎨" } }
+                    ]
+                },
+                {
+                    type: 1,
+                    components: [
+                        { type: 2, style: 3, custom_id: "btn_dropar_painel_sugestao", label: "Dropar Painel Público", emoji: { name: "📦" } }
                     ]
                 },
                 {

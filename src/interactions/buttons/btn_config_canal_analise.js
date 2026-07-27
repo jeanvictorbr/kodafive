@@ -1,23 +1,32 @@
-const { pool } = require('../../database/db');
+const { Routes } = require('discord.js');
 
 module.exports = {
     customId: 'btn_config_canal_analise',
     async execute(client, interaction) {
-        const config = (await pool.query(
-            'SELECT canal_analise_id FROM config_sugestao WHERE guild_id = $1',
-            [interaction.guildId]
-        )).rows[0] || {};
-
-        await interaction.showModal({
-            custom_id: 'modal_config_canal_analise',
-            title: 'Canal de Análise',
-            components: [
-                {
-                    type: 18,
-                    label: 'ID do canal para análise',
-                    component: { type: 4, custom_id: "input_channel_id", style: 1, value: config.canal_analise_id || '', placeholder: "123456789012345678", required: true }
+        await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
+            body: {
+                type: 7,
+                data: {
+                    flags: 32832,
+                    components: [{
+                        type: 17,
+                        accent_color: 16711680,
+                        components: [
+                            { type: 10, content: "# 📢 Selecionar Canal de Análise\nEscolhe o canal onde as sugestões vão aparecer pra galera discutir." },
+                            { type: 14, spacing: 1, divider: true },
+                            {
+                                type: 1,
+                                components: [{
+                                    type: 8,
+                                    custom_id: "select_canal_analise",
+                                    placeholder: "Escolha um canal de texto...",
+                                    channel_types: [0]
+                                }]
+                            }
+                        ]
+                    }]
                 }
-            ]
+            }
         });
     }
 };

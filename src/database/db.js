@@ -203,9 +203,13 @@ async function iniciarBanco() {
         await pool.query(`
             CREATE TABLE IF NOT EXISTS config_sugestao (
                 guild_id VARCHAR(255) PRIMARY KEY,
-                canal_analise_id VARCHAR(255)
+                canal_analise_id VARCHAR(255),
+                banner_url VARCHAR(500) DEFAULT 'https://i.ibb.co/68037k9/banner-placeholder.png',
+                descricao TEXT DEFAULT 'Manda tua sugestão pra gente! Pode ser sobre sisteminhas, eventos, regras ou o que vier na mente.'
             );
         `);
+        await pool.query(`ALTER TABLE config_sugestao ADD COLUMN IF NOT EXISTS banner_url VARCHAR(500) DEFAULT 'https://i.ibb.co/68037k9/banner-placeholder.png';`);
+        await pool.query(`ALTER TABLE config_sugestao ADD COLUMN IF NOT EXISTS descricao TEXT DEFAULT 'Manda tua sugestão pra gente! Pode ser sobre sisteminhas, eventos, regras ou o que vier na mente.';`);
 
         await pool.query(`
             CREATE TABLE IF NOT EXISTS sugestoes (

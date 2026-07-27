@@ -6,11 +6,26 @@ module.exports = async (client) => {
 
     const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
     
-    // Simulação do array de comandos que você carregaria dinamicamente
     const commands = [
         {
             name: 'kodafive',
             description: 'Abre o QG do Patrão | Central de Gestão'
+        },
+        {
+            name: 'Dossiê',
+            type: 2
+        },
+        {
+            name: 'Aplicar Multa',
+            type: 2
+        },
+        {
+            name: 'Advertir',
+            type: 2
+        },
+        {
+            name: 'Suspender',
+            type: 2
         }
     ];
 

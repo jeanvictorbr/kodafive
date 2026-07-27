@@ -8,12 +8,16 @@ async function buildPainelTribunal(interaction) {
         totalPorTipo(guildId, 'multa'),
         totalPorTipo(guildId, 'advertencia'),
         totalPorTipo(guildId, 'suspensao', true),
-        pool.query('SELECT canal_log_tribunal_id FROM server_config WHERE guild_id = $1', [guildId])
+        pool.query('SELECT canal_log_tribunal_id, cargo_tribunal_id FROM server_config WHERE guild_id = $1', [guildId])
     ]);
 
     const canalLog = serverConf.rows[0]?.canal_log_tribunal_id;
     const canalLogStatus = canalLog ? `<#${canalLog}>` : '`❌ Não definido`';
     const canalLogDefault = canalLog ? [{ id: canalLog, type: 'channel' }] : [];
+
+    const cargoTribunal = serverConf.rows[0]?.cargo_tribunal_id;
+    const cargoStatus = cargoTribunal ? `<@&${cargoTribunal}>` : '`❌ Não definido`';
+    const cargoDefault = cargoTribunal ? [{ id: cargoTribunal, type: 'role' }] : [];
 
     const avatarUrl = interaction.user.displayAvatarURL({ extension: 'png', size: 256 });
 
@@ -35,7 +39,10 @@ async function buildPainelTribunal(interaction) {
                     content: `### 📊 Status da Disciplina\n> **Multas Aplicadas:** \`${totalMultas}\`\n> **Advertências:** \`${totalAdvertencias}\`\n> **Suspensões Ativas:** \`${totalSuspensoes}\``
                 },
                 { type: 14, spacing: 1, divider: true },
+                { type: 10, content: `### ⚙️ Configurações\n**Canal de Logs:** ${canalLogStatus}\n**Cargo com Acesso:** ${cargoStatus}\n\n> *O cargo define quem pode usar as ações do Tribunal e o menu de contexto (botão direito).*` },
+                { type: 14, spacing: 1, divider: true },
                 { type: 1, components: [{ type: 8, custom_id: "config_select_canal_log_tribunal", placeholder: "Canal de Logs do Tribunal", channel_types: [0], default_values: canalLogDefault }] },
+                { type: 1, components: [{ type: 6, custom_id: "config_select_cargo_tribunal", placeholder: "Cargo com permissão no Tribunal", default_values: cargoDefault }] },
                 { type: 14, spacing: 1, divider: true },
                 {
                     type: 1,
@@ -53,8 +60,6 @@ async function buildPainelTribunal(interaction) {
                         { type: 2, style: 4, custom_id: "btn_voltar_menu_principal", label: "Voltar ao QG", emoji: { name: "🔙" } }
                     ]
                 },
-                { type: 14, spacing: 1, divider: true },
-                { type: 10, content: `> **Canal de Logs:** ${canalLogStatus}` },
                 { type: 14, spacing: 1, divider: true },
                 { type: 10, content: "*💼 KODA STUDIOS • Sistema de Gestão Inteligente*" }
             ]

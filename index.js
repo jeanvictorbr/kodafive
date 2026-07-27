@@ -12,7 +12,8 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.DirectMessages // Pra receber prints de comprovante via DM
+        GatewayIntentBits.DirectMessages,
+        GatewayIntentBits.MessageContent // Pra ler palavras-chave do FAQ
     ]
 });
 

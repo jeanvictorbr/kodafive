@@ -72,6 +72,12 @@ async function buildPainelFarm(interaction) {
                         { type: 2, style: 2, custom_id: "btn_voltar_gestao", label: "Voltar ao Menu", emoji: { name: "🔙" } }
                     ]
                 },
+                {
+                    type: 1,
+                    components: [
+                        { type: 2, style: 4, custom_id: "btn_resetar_farm", label: "Zerar Placar", emoji: { name: "🔄" } }
+                    ]
+                },
                 { type: 14, spacing: 1, divider: true },
                 { type: 10, content: "💼 *KODA STUDIOS • Sistema de Gestão Inteligente*" }
             ]

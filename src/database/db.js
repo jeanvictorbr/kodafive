@@ -233,21 +233,24 @@ async function iniciarBanco() {
             );
         `);
 
-        // 14. Plantão
+        // 14. Plantão (Escala de Serviço)
         await pool.query(`
             CREATE TABLE IF NOT EXISTS plantao (
                 id SERIAL PRIMARY KEY,
                 guild_id VARCHAR(255) NOT NULL,
                 user_id VARCHAR(255) NOT NULL,
+                cargo VARCHAR(100) NOT NULL DEFAULT 'Recrutador',
                 inicio TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 fim TIMESTAMP,
                 status VARCHAR(50) DEFAULT 'ativo',
                 criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
+        await pool.query(`ALTER TABLE plantao ADD COLUMN IF NOT EXISTS cargo VARCHAR(100) NOT NULL DEFAULT 'Recrutador';`);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS canal_plantao_id VARCHAR(255);`);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS cargo_plantao_id VARCHAR(255);`);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS plantao_banner VARCHAR(500) DEFAULT 'https://i.ibb.co/68037k9/banner-placeholder.png';`);
-        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS plantao_desc TEXT DEFAULT 'Controle quem está de serviço na facção. Use os botões abaixo para iniciar/finalizar seu plantão.';`);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS plantao_desc TEXT DEFAULT 'Organize a escala de serviço da liderança. Garanta que sempre haja um responsável online.';`);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS plantao_msg_id VARCHAR(255);`);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS plantao_msg_canal_id VARCHAR(255);`);
 

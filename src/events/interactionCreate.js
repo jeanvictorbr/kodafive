@@ -63,11 +63,7 @@ module.exports = async (client, interaction) => {
     if (customId && customId.startsWith('page_next_disabled')) return;
     if (customId && customId.startsWith('page_back_p')) customId = 'page_back';
     if (customId && customId.startsWith('page_next_p')) customId = 'page_next';
-    if (customId && customId.startsWith('btn_plantao_iniciar_p')) customId = 'btn_plantao_iniciar';
-    if (customId && customId.startsWith('btn_plantao_finalizar_p')) customId = 'btn_plantao_finalizar';
-    if (customId && customId.startsWith('modal_plantao_config_banner_p')) customId = 'modal_plantao_config_banner';
-    if (customId && customId.startsWith('modal_plantao_config_desc_p')) customId = 'modal_plantao_config_desc';
-    // Fallback: se tem _p\d+ no final e o ID sem sufixo existe, usa ele
+    // Fallback genérico: se tem _p\d+ no final e o ID sem sufixo existe, usa ele
     const paginaSuffix = customId?.match(/^(.*?)_p\d+$/);
     if (paginaSuffix && interactions.has(paginaSuffix[1])) {
         customId = paginaSuffix[1];

@@ -1,9 +1,8 @@
 module.exports = {
     customId: 'btn_plantao_config_banner',
     async execute(client, interaction) {
-        const pagina = parseInt(interaction.customId.match(/_p(\d+)$/)?.[1]) || 1;
         await interaction.showModal({
-            custom_id: `modal_plantao_config_banner_p${pagina}`,
+            custom_id: 'modal_plantao_config_banner',
             title: "🖼 Alterar Banner do Plantão",
             components: [{
                 type: 18,

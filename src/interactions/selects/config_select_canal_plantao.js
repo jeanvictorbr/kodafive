@@ -9,8 +9,8 @@ module.exports = {
             'UPDATE server_config SET canal_plantao_id = $1 WHERE guild_id = $2',
             [interaction.values[0], interaction.guildId]
         );
-        const pagina = parseInt(interaction.customId.match(/_p(\d+)$/)?.[1]) || 1;
-        const painel = await buildPainelPlantao(interaction, pagina);
+
+        const painel = await buildPainelPlantao(interaction);
         await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
             body: { type: 7, data: { flags: 32832, components: painel } }
         });

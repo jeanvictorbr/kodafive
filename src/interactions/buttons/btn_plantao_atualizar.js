@@ -6,7 +6,6 @@ const { buildPlantaoPublico } = require('../../utils/buildPainelPlantaoPublico')
 module.exports = {
     customId: 'btn_plantao_atualizar',
     async execute(client, interaction) {
-        const pagina = parseInt(interaction.customId.match(/_p(\d+)$/)?.[1]) || 1;
         const config = (await pool.query(
             'SELECT plantao_msg_id, plantao_msg_canal_id FROM server_config WHERE guild_id = $1',
             [interaction.guildId]
@@ -23,7 +22,7 @@ module.exports = {
             }
         }
 
-        const painel = await buildPainelPlantao(interaction, pagina);
+        const painel = await buildPainelPlantao(interaction);
         await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
             body: { type: 7, data: { flags: 32832, components: painel } }
         });

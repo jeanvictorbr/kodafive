@@ -29,16 +29,16 @@ async function buildPainelQG(interaction, pagina = 1) {
         },
         {
             type: 9,
-            components: [{ type: 10, content: "### 🏷️ Tags Automáticas\nTags automáticas no apelido baseado em cargo." }],
-            accessory: { type: 2, style: 2, custom_id: "btn_modulo_tags", label: "Explorar" }
+            components: [{ type: 10, content: `### 🏷️ Tags Automáticas 💎\n\`[REQUER VIP]\` Tags automáticas no apelido baseado em cargo.` }],
+            accessory: { type: 2, style: 2, custom_id: "btn_modulo_tags", label: "Explorar", disabled: !isVip }
         }
     ];
 
     const modulesPagina2 = [
         {
             type: 9,
-            components: [{ type: 10, content: "### 🤖 Auto-Resposta (FAQ)\nPalavras-chave com respostas automáticas nos canais." }],
-            accessory: { type: 2, style: 2, custom_id: "btn_modulo_faq", label: "Explorar" }
+            components: [{ type: 10, content: `### 🤖 Auto-Resposta (FAQ) 💎\n\`[REQUER VIP]\` Palavras-chave com respostas automáticas.` }],
+            accessory: { type: 2, style: 2, custom_id: "btn_modulo_faq", label: "Explorar", disabled: !isVip }
         },
         {
             type: 9,
@@ -52,8 +52,8 @@ async function buildPainelQG(interaction, pagina = 1) {
         },
         {
             type: 9,
-            components: [{ type: 10, content: "### 🧹 Expurgo Automático\nRemova cargos de membros inativos." }],
-            accessory: { type: 2, style: 2, custom_id: "btn_modulo_expurgo", label: "Explorar" }
+            components: [{ type: 10, content: `### 🧹 Expurgo Automático 💎\n\`[REQUER VIP]\` Remova cargos de membros inativos.` }],
+            accessory: { type: 2, style: 2, custom_id: "btn_modulo_expurgo", label: "Explorar", disabled: !isVip }
         },
         {
             type: 9,

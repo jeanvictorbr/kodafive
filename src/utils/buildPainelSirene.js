@@ -1,6 +1,6 @@
 const { pool } = require('../database/db');
 
-async function buildPainelSirene(interaction) {
+async function buildPainelSirene(interaction, pagina = 1) {
     const config = (await pool.query(
         'SELECT cargo_alerta_id, nome_faccao FROM server_config WHERE guild_id = $1',
         [interaction.guildId]
@@ -50,7 +50,7 @@ async function buildPainelSirene(interaction) {
                 {
                     type: 1,
                     components: [
-                        { type: 2, style: 4, custom_id: "btn_voltar_menu_principal", label: "Voltar ao QG", emoji: { name: "🔙" } }
+                        { type: 2, style: 4, custom_id: `btn_voltar_menu_principal_p${pagina}`, label: "Voltar ao QG", emoji: { name: "🔙" } }
                     ]
                 },
                 { type: 14, spacing: 1, divider: true },

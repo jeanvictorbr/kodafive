@@ -1,6 +1,6 @@
 const { pool } = require('../database/db');
 
-async function buildPainelAliancasAdmin(interaction) {
+async function buildPainelAliancasAdmin(interaction, pagina = 1) {
     const aliancas = await pool.query(
         'SELECT * FROM aliancas WHERE guild_id = $1 ORDER BY tipo ASC, posicao ASC',
         [interaction.guildId]
@@ -46,7 +46,7 @@ async function buildPainelAliancasAdmin(interaction) {
                 {
                     type: 1,
                     components: [
-                        { type: 2, style: 4, custom_id: "btn_voltar_menu_principal", label: "Voltar ao QG", emoji: { name: "🔙" } }
+                        { type: 2, style: 4, custom_id: `btn_voltar_menu_principal_p${pagina}`, label: "Voltar ao QG", emoji: { name: "🔙" } }
                     ]
                 },
                 { type: 14, spacing: 1, divider: true },

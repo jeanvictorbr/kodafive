@@ -9,8 +9,9 @@ module.exports = {
         if (!config.rows[0]?.is_vip) {
             return interaction.reply({ content: '❌ Este módulo é exclusivo para servidores **VIP**. Resgate uma chave no QG.', flags: 64 });
         }
+        const pagina = parseInt(interaction.customId.match(/_p(\d+)$/)?.[1]) || 1;
         try {
-            const painel = await buildPainelTags(interaction);
+            const painel = await buildPainelTags(interaction, pagina);
             await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
                 body: { type: 7, data: { flags: 32832, components: painel } }
             });

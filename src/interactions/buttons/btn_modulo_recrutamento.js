@@ -4,7 +4,7 @@ const { Routes } = require('discord.js');
 module.exports = {
     customId: 'btn_modulo_recrutamento',
     async execute(client, interaction) {
-        // Puxa a foto do gestor pro topo
+        const pagina = parseInt(interaction.customId.match(/_p(\d+)$/)?.[1]) || 1;
         const avatarUrl = interaction.user.displayAvatarURL({ extension: 'png', size: 256 });
 
         // Nova interface intermediária (Menu de Submódulos)
@@ -47,7 +47,7 @@ module.exports = {
                     {
                         type: 1, // Botão para voltar pro QG Principal
                         components: [
-                            { type: 2, style: 4, custom_id: "btn_voltar_menu_principal", label: "Voltar ao QG", emoji: { name: "🔙" } }
+                            { type: 2, style: 4, custom_id: `btn_voltar_menu_principal_p${pagina}`, label: "Voltar ao QG", emoji: { name: "🔙" } }
                         ]
                     },
                     { type: 10, content: "💼 *KODA STUDIOS • Sistema de Gestão Inteligente*" }

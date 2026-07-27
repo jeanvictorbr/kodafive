@@ -1,6 +1,6 @@
 const { pool } = require('../database/db');
 
-async function buildPainelSugestoes(interaction) {
+async function buildPainelSugestoes(interaction, pagina = 1) {
     const config = (await pool.query(
         'SELECT * FROM config_sugestao WHERE guild_id = $1',
         [interaction.guildId]
@@ -72,7 +72,7 @@ async function buildPainelSugestoes(interaction) {
                 {
                     type: 1,
                     components: [
-                        { type: 2, style: 4, custom_id: "btn_voltar_menu_principal", label: "Voltar ao QG", emoji: { name: "🔙" } }
+                        { type: 2, style: 4, custom_id: `btn_voltar_menu_principal_p${pagina}`, label: "Voltar ao QG", emoji: { name: "🔙" } }
                     ]
                 },
                 { type: 14, spacing: 1, divider: true },

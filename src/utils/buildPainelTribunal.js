@@ -1,7 +1,7 @@
 const { pool } = require('../database/db');
 const { totalPorTipo } = require('./condutaHelper');
 
-async function buildPainelTribunal(interaction) {
+async function buildPainelTribunal(interaction, pagina = 1) {
     const guildId = interaction.guildId;
 
     const [totalMultas, totalAdvertencias, totalSuspensoes, serverConf] = await Promise.all([
@@ -57,7 +57,7 @@ async function buildPainelTribunal(interaction) {
                     components: [
                         { type: 2, style: 2, custom_id: "btn_ver_dossie", label: "Dossiê do Membro", emoji: { name: "📄" } },
                         { type: 2, style: 3, custom_id: "btn_tribunal_ranking", label: "Ranking de Conduta", emoji: { name: "🏆" } },
-                        { type: 2, style: 4, custom_id: "btn_voltar_menu_principal", label: "Voltar ao QG", emoji: { name: "🔙" } }
+                        { type: 2, style: 4, custom_id: `btn_voltar_menu_principal_p${pagina}`, label: "Voltar ao QG", emoji: { name: "🔙" } }
                     ]
                 },
                 { type: 14, spacing: 1, divider: true },

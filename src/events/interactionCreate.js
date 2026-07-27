@@ -59,6 +59,12 @@ module.exports = async (client, interaction) => {
     if (customId && customId.startsWith('modal_add_tag_')) customId = 'modal_add_tag';
     if (customId && customId.startsWith('page_back_disabled')) return;
     if (customId && customId.startsWith('page_next_disabled')) return;
+    if (customId && customId.startsWith('page_back_p')) customId = 'page_back';
+    if (customId && customId.startsWith('page_next_p')) customId = 'page_next';
+    if (customId && customId.startsWith('btn_voltar_menu_principal_p')) customId = 'btn_voltar_menu_principal';
+    if (customId && /^btn_modulo_\w+_p\d+$/.test(customId)) {
+        customId = customId.replace(/_p\d+$/, '');
+    }
 
     const interactionHandler = interactions.get(customId);
 

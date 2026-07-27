@@ -1,6 +1,6 @@
 const { pool } = require('../database/db');
 
-async function buildPainelFAQ(interaction) {
+async function buildPainelFAQ(interaction, pagina = 1) {
     const [configs, serverConf] = await Promise.all([
         pool.query('SELECT * FROM auto_resposta WHERE guild_id = $1 ORDER BY id ASC', [interaction.guildId]),
         pool.query('SELECT faq_ativo FROM server_config WHERE guild_id = $1', [interaction.guildId])
@@ -53,7 +53,7 @@ async function buildPainelFAQ(interaction) {
                 {
                     type: 1,
                     components: [
-                        { type: 2, style: 4, custom_id: "btn_voltar_menu_principal", label: "Voltar ao QG", emoji: { name: "🔙" } }
+                        { type: 2, style: 4, custom_id: `btn_voltar_menu_principal_p${pagina}`, label: "Voltar ao QG", emoji: { name: "🔙" } }
                     ]
                 },
                 { type: 14, spacing: 1, divider: true },

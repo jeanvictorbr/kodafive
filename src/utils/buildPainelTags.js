@@ -2,7 +2,7 @@ const { pool } = require('../database/db');
 
 const MAX_NICK_LENGTH = 100;
 
-async function buildPainelTags(interaction) {
+async function buildPainelTags(interaction, pagina = 1) {
     const configs = await pool.query(
         'SELECT * FROM cargo_tags WHERE guild_id = $1 ORDER BY id ASC',
         [interaction.guildId]
@@ -60,7 +60,7 @@ async function buildPainelTags(interaction) {
                 {
                     type: 1,
                     components: [
-                        { type: 2, style: 4, custom_id: "btn_voltar_menu_principal", label: "Voltar ao QG", emoji: { name: "🔙" } }
+                        { type: 2, style: 4, custom_id: `btn_voltar_menu_principal_p${pagina}`, label: "Voltar ao QG", emoji: { name: "🔙" } }
                     ]
                 },
                 { type: 14, spacing: 1, divider: true },

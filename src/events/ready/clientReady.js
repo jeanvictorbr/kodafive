@@ -15,6 +15,7 @@ module.exports = async (client) => {
             name: 'dev',
             description: '[DEV] Central de Controle do Bot'
         },
+
         {
             name: 'Dossiê',
             type: 2

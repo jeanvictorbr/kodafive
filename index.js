@@ -6,6 +6,7 @@ const { iniciarBanco } = require('./src/database/db.js');
 const { iniciarSchedulerFarm } = require('./src/utils/farmScheduler');
 const { iniciarSchedulerExpurgo } = require('./src/utils/expurgoScheduler');
 const { iniciarSchedulerVip } = require('./src/utils/vipScheduler');
+const { iniciarLembreteScheduler } = require('./src/utils/lembreteScheduler');
 const { sendLogWebhook } = require('./src/utils/webhookLogger');
 
 // Configurando o cliente inquebrável com os Intents necessários
@@ -51,6 +52,8 @@ iniciarSchedulerExpurgo(client);
 console.log('[SISTEMA] Motor de expurgo automático ativado!');
 iniciarSchedulerVip(client);
 console.log('[SISTEMA] Motor de expiração VIP ativado!');
+iniciarLembreteScheduler(client);
+console.log('[SISTEMA] Motor de lembretes automáticos ativado!');
 
 // ==========================================
 // 📂 CARREGADOR DE EVENTOS (Event Handler)

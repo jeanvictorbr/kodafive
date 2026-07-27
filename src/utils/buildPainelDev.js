@@ -162,6 +162,8 @@ async function buildPainelDevServer(client, guildId) {
     const autoRespostas = (await pool.query('SELECT COUNT(*)::int as total FROM auto_resposta WHERE guild_id = $1', [guildId])).rows[0].total;
     const tags = (await pool.query('SELECT COUNT(*)::int as total FROM cargo_tags WHERE guild_id = $1', [guildId])).rows[0].total;
     const aliancas = (await pool.query('SELECT COUNT(*)::int as total FROM aliancas WHERE guild_id = $1', [guildId])).rows[0].total;
+    const plantaoAtivo = (await pool.query("SELECT COUNT(*)::int as total FROM plantao WHERE guild_id = $1 AND status = 'ativo'", [guildId])).rows[0].total;
+    const lembreteConfig = (await pool.query('SELECT ativo, dias_sem_ponto FROM config_lembrete WHERE guild_id = $1', [guildId])).rows[0];
 
     let vipTexto = isVip ? `${origemLabel(vipOrigem)}` : '❌ Não';
     if (isVip && vipExpira) {
@@ -186,7 +188,7 @@ async function buildPainelDevServer(client, guildId) {
             { type: 14, spacing: 1, divider: true },
             {
                 type: 10,
-                content: `### 📊 Informações\n> 💎 **VIP:** ${vipTexto}\n> 📋 Membros no banco: **${membros}**\n> 📝 Fichas: **${fichas}** • 💡 Sugestões: **${sugestoes}**\n> 🤖 Auto-respostas: **${autoRespostas}** • 🏷️ Tags: **${tags}**\n> 🤝 Alianças: **${aliancas}**\n> 📅 Criado em: ${formatDate(guild.createdAt)}`
+                content: `### 📊 Informações\n> 💎 **VIP:** ${vipTexto}\n> 📋 Membros no banco: **${membros}**\n> 📝 Fichas: **${fichas}** • 💡 Sugestões: **${sugestoes}**\n> 🤖 Auto-respostas: **${autoRespostas}** • 🏷️ Tags: **${tags}**\n> 🤝 Alianças: **${aliancas}**\n> 📋 Plantão ativo: **${plantaoAtivo}**\n> ⏰ Lembretes: ${lembreteConfig?.ativo ? '✅ Sim (' + lembreteConfig.dias_sem_ponto + 'd sem ponto)' : '❌ Desligado'}\n> 📅 Criado em: ${formatDate(guild.createdAt)}`
             },
             { type: 14, spacing: 1, divider: true },
             {

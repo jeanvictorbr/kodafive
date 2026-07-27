@@ -233,6 +233,36 @@ async function iniciarBanco() {
             );
         `);
 
+        // 14. Plantão
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS plantao (
+                id SERIAL PRIMARY KEY,
+                guild_id VARCHAR(255) NOT NULL,
+                user_id VARCHAR(255) NOT NULL,
+                inicio TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                fim TIMESTAMP,
+                status VARCHAR(50) DEFAULT 'ativo',
+                criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS canal_plantao_id VARCHAR(255);`);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS plantao_banner VARCHAR(500) DEFAULT 'https://i.ibb.co/68037k9/banner-placeholder.png';`);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS plantao_desc TEXT DEFAULT 'Controle quem está de serviço na facção. Use os botões abaixo para iniciar/finalizar seu plantão.';`);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS plantao_msg_id VARCHAR(255);`);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS plantao_msg_canal_id VARCHAR(255);`);
+
+        // 15. Lembretes Automáticos
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS config_lembrete (
+                guild_id VARCHAR(255) PRIMARY KEY,
+                ativo BOOLEAN DEFAULT false,
+                canal_log_id VARCHAR(255) DEFAULT '',
+                dias_sem_ponto INT DEFAULT 3,
+                avisar_farm BOOLEAN DEFAULT true,
+                intervalo_horas INT DEFAULT 6
+            );
+        `);
+
         console.log('[BANCO] Estrutura completa e atualizada com sucesso no PostgreSQL. NADA FOI ZERADO!');
     } catch (error) {
         console.error('[ERRO] Falha ao atualizar o PostgreSQL:', error);

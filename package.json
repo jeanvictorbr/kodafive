@@ -1,26 +1,20 @@
 {
-  "name": "kodafive",
+  "name": "kodafacv2",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Bot de Gestão para Facções FVEM",
+  "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/index.js",
+    "postinstall": "npx prisma generate",
+    "prebuild": "npx prisma generate",
+    "build": "echo 'Build complete'"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jeanvictorbr/kodafive.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/jeanvictorbr/kodafive/issues"
-  },
-  "homepage": "https://github.com/jeanvictorbr/kodafive#readme",
   "dependencies": {
-    "discord.js": "^14.27.0",
-    "dotenv": "^17.4.2",
-    "pg": "^8.22.0"
+    "@prisma/client": "^5.14.0",
+    "discord.js": "^14.15.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "prisma": "^5.14.0"
   }
 }

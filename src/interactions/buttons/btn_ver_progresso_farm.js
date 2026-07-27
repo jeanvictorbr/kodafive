@@ -1,6 +1,6 @@
 module.exports = {
     customId: 'btn_ver_progresso_farm',
-    async execute(interaction) {
+    async execute(client, interaction) {
         // [SEU BANCO AQUI] Puxa a cota individual do cria
         const userId = interaction.user.id;
         const farmMembro = { entregue: 20, item: 'Pacotes' };

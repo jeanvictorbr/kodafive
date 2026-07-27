@@ -10,22 +10,46 @@ module.exports = {
         const userId = interaction.user.id;
         const hoje = new Date().toISOString().split('T')[0];
 
-        await pool.query(
-            'SELECT id FROM plantao WHERE guild_id = $1 AND user_id = $2 AND data_plantao = $3 AND hora_inicio = $4 AND status = $5',
-            [guildId, userId, hoje, horaInicio, 'agendado']
-        );
-
         const jaTem = await pool.query(
             'SELECT id FROM plantao WHERE guild_id = $1 AND user_id = $2 AND data_plantao = $3 AND hora_inicio = $4 AND status = $5',
             [guildId, userId, hoje, horaInicio, 'agendado']
         );
 
         if (jaTem.rows.length > 0) {
+            await pool.query(
+                "DELETE FROM plantao WHERE guild_id = $1 AND user_id = $2 AND data_plantao = $3 AND hora_inicio = $4 AND status = 'agendado'",
+                [guildId, userId, hoje, horaInicio]
+            );
+
+            const logCfg = await pool.query(
+                'SELECT plantao_log_id, plantao_msg_id, plantao_msg_canal_id FROM server_config WHERE guild_id = $1',
+                [guildId]
+            );
+            const lr = logCfg.rows[0] || {};
+
+            if (lr.plantao_log_id) {
+                const logCanal = interaction.guild.channels.cache.get(lr.plantao_log_id);
+                if (logCanal) {
+                    await logCanal.send({ content: `❌ **<@${userId}>** cancelou a cobertura das **${horaInicio} às ${horaFim}**` }).catch(() => {});
+                }
+            }
+
+            if (lr.plantao_msg_id && lr.plantao_msg_canal_id) {
+                const canal = interaction.guild.channels.cache.get(lr.plantao_msg_canal_id);
+                if (canal) {
+                    try {
+                        const msg = await canal.messages.fetch(lr.plantao_msg_id);
+                        const painel = await buildPlantaoPublico(guildId);
+                        await msg.edit({ flags: 32768, components: painel });
+                    } catch {}
+                }
+            }
+
             return client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
                 body: { type: 7, data: { flags: 32832, components: [{
                     type: 17, accent_color: 15548997,
                     components: [
-                        { type: 10, content: `# ⚠️ Já tás nesse horário\nTu já marcou esse bloco de **${horaInicio} às ${horaFim}** hoje.` }
+                        { type: 10, content: `# ❌ Desmarcado!\n<@${userId}> cancelou a cobertura das **${horaInicio} às ${horaFim}**.` }
                     ]
                 }] } }
             });

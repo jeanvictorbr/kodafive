@@ -9,6 +9,21 @@ module.exports = {
         const guildId = interaction.guildId;
         const userId = interaction.user.id;
 
+        const jaAtivo = await pool.query(
+            "SELECT id FROM plantao WHERE guild_id = $1 AND user_id = $2 AND status = 'ativo' AND tipo = 'agora'",
+            [guildId, userId]
+        );
+        if (jaAtivo.rows.length > 0) {
+            return client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
+                body: { type: 7, data: { flags: 32832, components: [{
+                    type: 17, accent_color: 15548997,
+                    components: [
+                        { type: 10, content: '# ⚠️ Tu já tá na ativa\nEncerra o plantão atual primeiro.' }
+                    ]
+                }] } }
+            });
+        }
+
         await pool.query(
             'INSERT INTO plantao (guild_id, user_id, cargo, tipo, inicio, status) VALUES ($1, $2, $3, $4, NOW(), $5)',
             [guildId, userId, cargo, 'agora', 'ativo']

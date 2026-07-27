@@ -197,6 +197,7 @@ async function iniciarBanco() {
         `);
 
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS cargo_alerta_id VARCHAR(255);`);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS faq_ativo BOOLEAN DEFAULT true;`);
 
         console.log('[BANCO] Estrutura completa e atualizada com sucesso no PostgreSQL. NADA FOI ZERADO!');
     } catch (error) {

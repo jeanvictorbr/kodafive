@@ -1,79 +1,51 @@
-// src/utils/vitrineFarm.js
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { pool } = require('../database/db'); // Puxa a conexão do seu banco
 
-/**
- * Função para atualizar a vitrine de farm em tempo real usando Components V2
- * @param {import('discord.js').Client} client - O cliente do bot
- * @param {string} guildId - O ID do servidor (Facção/Cidade)
- */
 async function atualizarVitrineFarm(client, guildId) {
     try {
-        // 1. [SEU BANCO AQUI] Puxe os dados da meta atual e os IDs de onde a mensagem da vitrine tá salva
-        // Exemplo: const db = await pool.query('SELECT canal_vitrine, msg_vitrine, ... FROM configs WHERE guild_id = $1', [guildId]);
-        
-        // Simulação do banco (Altere para os seus dados reais)
-        const dbFarm = {
-            canalVitrineId: null, // Deixe null ou vazio no banco se a vitrine não foi dropada
-            mensagemVitrineId: null, 
-            metaAtual: 150,
-            metaTotal: 500,
-            item: 'Pacotes',
-            ciclo: 'Termina em 2 horas'
-        };
+        // 1. PUXA DO BANCO DE DADOS REAL (NADA DE MEMÓRIA RAM)
+        const query = await pool.query(
+            'SELECT canal_vitrine_id, msg_vitrine_id, meta_atual, meta_total, item_nome, ciclo FROM farm_config WHERE guild_id = $1',
+            [guildId]
+        );
 
-        // Se o banco retornar null/undefined pros IDs, a vitrine não existe. Sai da função quietinho.
-        if (!dbFarm.canalVitrineId || !dbFarm.mensagemVitrineId || dbFarm.canalVitrineId === '123456789012345678') {
-            return; 
-        }
+        // Se não tem configuração de vitrine salva no banco, sai quieto
+        if (query.rowCount === 0) return;
 
-        // 2. Busca o canal de forma segura (Se der erro 10003, o canal não existe mais)
+        const dbFarm = query.rows[0];
+
+        // Se a vitrine não foi dropada ainda (IDs nulos), sai quieto
+        if (!dbFarm.canal_vitrine_id || !dbFarm.msg_vitrine_id) return;
+
+        // 2. Busca o Canal e a Mensagem de forma blindada
         let channel;
         try {
-            channel = client.channels.cache.get(dbFarm.canalVitrineId) || await client.channels.fetch(dbFarm.canalVitrineId);
-        } catch (err) {
-            // Canal desconhecido (foi apagado ou o ID tá errado). Sai da função sem gerar erro no console.
-            return; 
-        }
+            channel = client.channels.cache.get(dbFarm.canal_vitrine_id) || await client.channels.fetch(dbFarm.canal_vitrine_id);
+        } catch (err) { return; }
 
-        // 3. Busca a mensagem de forma segura (Se der erro 10008, a mensagem foi apagada)
         let message;
         try {
-            message = channel.messages.cache.get(dbFarm.mensagemVitrineId) || await channel.messages.fetch(dbFarm.mensagemVitrineId);
-        } catch (err) {
-            // Mensagem desconhecida. Sai da função sem gerar erro.
-            return;
-        }
+            message = channel.messages.cache.get(dbFarm.msg_vitrine_id) || await channel.messages.fetch(dbFarm.msg_vitrine_id);
+        } catch (err) { return; }
 
-        // ====================================================================
-        // SE CHEGOU AQUI, O CANAL E A MENSAGEM EXISTEM! VAMOS ATUALIZAR.
-        // ====================================================================
-
+        // 3. Monta o Payload V2 com os dados QUE VIERAM DO BANCO
         const payloadV2 = {
-            flags: 32768, // Modo Components V2
+            flags: 32768, 
             components: [
                 {
-                    type: 17, // Container Component
-                    accent_color: 3092790, // Cor na lateral
+                    type: 17, 
+                    accent_color: 3092790, 
                     components: [
-                        { 
-                            type: 10, // TextDisplay
-                            content: "## 🌿 | Progresso do Farm da Facção\n\nAcompanhe a cota atual da quebrada, tropa." 
-                        },
-                        { 
-                            type: 14, // Separator
-                            spacing: 1, 
-                            divider: true 
-                        },
+                        { type: 10, content: "## 🌿 | Progresso do Farm da Facção\n\nAcompanhe a cota atual da quebrada, tropa." },
+                        { type: 14, spacing: 1, divider: true },
                         { 
                             type: 10, 
-                            content: `**Meta Global:** \`${dbFarm.metaAtual} / ${dbFarm.metaTotal} ${dbFarm.item}\`\n**Status:** ${dbFarm.ciclo}` 
+                            // Puxa as variáveis reais que vieram da query
+                            content: `**Meta Global:** \`${dbFarm.meta_atual} / ${dbFarm.meta_total} ${dbFarm.item_nome}\`\n**Status:** ${dbFarm.ciclo}` 
                         },
-                        { 
-                            type: 14, 
-                            spacing: 2, 
-                            divider: false
-                        },
+                        { type: 14, spacing: 2, divider: false },
                         {
-                            type: 1, // ActionRow (Botões)
+                            type: 1, 
                             components: [
                                 {
                                     type: 2, 
@@ -89,13 +61,12 @@ async function atualizarVitrineFarm(client, guildId) {
             ]
         };
 
-        // 4. Edita a mensagem vitrine na mesma hora
+        // 4. Edita a mensagem vitrine
         await message.edit(payloadV2);
-        console.log(`[SISTEMA] Vitrine do Farm (${guildId}) sincronizada no padrão V2 com sucesso!`);
+        console.log(`[SISTEMA] Vitrine do Farm (${guildId}) sincronizada direto do Banco de Dados!`);
 
     } catch (error) {
-        // Se der algum erro muito louco que a gente não previu, ele loga aqui
-        console.error('[ERRO CRÍTICO] Falha inesperada ao atualizar a vitrine de farm:', error);
+        console.error('[ERRO] Falha ao atualizar vitrine do banco:', error);
     }
 }
 

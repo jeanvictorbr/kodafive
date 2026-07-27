@@ -7,7 +7,7 @@ const pool = new Pool({
 
 async function iniciarBanco() {
     try {
-        // 1. Tabela Principal de Configuração do Servidor (Deve vir primeiro por causa das dependências)
+        // 1. Tabela Principal de Configuração do Servidor
         await pool.query(`
             CREATE TABLE IF NOT EXISTS server_config (
                 guild_id VARCHAR(255) PRIMARY KEY,
@@ -25,38 +25,27 @@ async function iniciarBanco() {
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS painel_rodape VARCHAR(255) DEFAULT 'Sistema de Recrutamento';`);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS canal_ponto_id VARCHAR(255);`);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS is_vip BOOLEAN DEFAULT false;`);
-
-// Configuração geral do ciclo de farm da guilda
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS ciclo_farm VARCHAR(50) DEFAULT 'semanal';`);
+        
+        // 🌟 ADDED: Colunas para o Sistema de Sincronia da Vitrine
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS canal_vitrine_id VARCHAR(255);`);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS msg_vitrine_id VARCHAR(255);`);
 
-// 2. Sistema Avançado de Metas de Farm (Recria a tabela caso estivesse com a chave errada em guild_id)
+        // 2. Sistema Avançado de Metas de Farm
+        // 🚨 OS DROPS FORAM REMOVIDOS PARA NÃO ZERAR OS DADOS NO RESTART 🚨
         await pool.query(`
-            DROP TABLE IF EXISTS entregas_farm CASCADE;
-            DROP TABLE IF EXISTS meta_farm_config CASCADE;
-
-            CREATE TABLE meta_farm_config (
+            CREATE TABLE IF NOT EXISTS meta_farm_config (
                 id SERIAL PRIMARY KEY,
                 guild_id VARCHAR(255) NOT NULL,
                 item_nome VARCHAR(255) NOT NULL,
                 meta_quantidade INT NOT NULL,
                 criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-
-            CREATE TABLE entregas_farm (
-                id SERIAL PRIMARY KEY,
-                guild_id VARCHAR(255) NOT NULL,
-                user_id VARCHAR(255) NOT NULL,
-                meta_id INT REFERENCES meta_farm_config(id) ON DELETE CASCADE,
-                quantidade INT NOT NULL,
-                comprovante_url TEXT,
-                data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
         `);
 
-        // Injeções de segurança caso a tabela já existisse sem essas colunas
-        await pool.query(`ALTER TABLE meta_farm_config ADD COLUMN IF NOT EXISTS id SERIAL;`);
+        // Migrations do Farm
         await pool.query(`ALTER TABLE meta_farm_config ADD COLUMN IF NOT EXISTS ciclo VARCHAR(50) DEFAULT 'semanal';`);
-        await pool.query(`ALTER TABLE meta_farm_config ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;`);
+        await pool.query(`ALTER TABLE meta_farm_config ADD COLUMN IF NOT EXISTS meta_atual INT DEFAULT 0;`); // 🌟 ADDED: Para guardar o progresso
 
         // Tabela de Entregas de Farm (Vinculada ao ID da meta)
         await pool.query(`
@@ -121,7 +110,7 @@ async function iniciarBanco() {
         await pool.query(`ALTER TABLE recrutamento ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'pendente';`);
         await pool.query(`ALTER TABLE recrutamento ADD COLUMN IF NOT EXISTS data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP;`);
 
-        console.log('[BANCO] Estrutura completa e atualizada com sucesso no PostgreSQL!');
+        console.log('[BANCO] Estrutura completa e atualizada com sucesso no PostgreSQL. NADA FOI ZERADO!');
     } catch (error) {
         console.error('[ERRO] Falha ao atualizar o PostgreSQL:', error);
     }

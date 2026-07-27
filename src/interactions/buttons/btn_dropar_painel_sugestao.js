@@ -8,7 +8,7 @@ module.exports = {
             const painel = await buildPainelPublicoSugestoes(interaction);
 
             await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
-                body: { type: 4, data: { components: painel } }
+                body: { type: 4, data: { flags: 32768, components: painel } }
             });
 
             // Follow-up efêmero de confirmação

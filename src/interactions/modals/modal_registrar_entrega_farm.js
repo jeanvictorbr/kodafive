@@ -28,7 +28,7 @@ module.exports = {
             );
 
             await interaction.reply({
-                content: `✅ **Entrega de ${quantidade.toLocaleString()}x ${itemName} registrada com sucesso!**\n\n📸 Agora **envia o print do depósito** na nossa DM pra gente salvar o comprovante.`,
+                content: `📸 **COMPROVANTE OBRIGATÓRIO!**\n\nSua entrega de \`${quantidade.toLocaleString()}x ${itemName}\] foi **registrada**, mas **não será validada** até você enviar o **print do depósito** como comprovante.\n\n✅ Envie o print na nossa **DM privada** agora mesmo para concluir.\n❌ Sem comprovante, a entrega será ignorada.`,
                 flags: 64
             });
 
@@ -37,7 +37,7 @@ module.exports = {
 
             const user = await client.users.fetch(userId).catch(() => null);
             if (user) {
-                await user.send(`📸 **Comprovante de Entrega**\n\nSua entrega de \`${quantidade.toLocaleString()}x ${itemName}\] foi registrada! Manda o **print do depósito/baú** como imagem aqui mesmo pra gente anexar ao registro.\n\n*Se não tiver comprovante, só ignora essa mensagem.*`).catch(() => {});
+                await user.send(`📸 **COMPROVANTE OBRIGATÓRIO!**\n\nSua entrega de \`${quantidade.toLocaleString()}x ${itemName}\] foi registrada, mas **precisa do print do depósito** pra ser validada.\n\n👉 Manda o **print** aqui mesmo como imagem.\n⏳ Você tem até o fim do ciclo pra enviar.\n❌ Sem comprovante, a entrega não conta.`).catch(() => {});
             }
 
         } catch (error) {

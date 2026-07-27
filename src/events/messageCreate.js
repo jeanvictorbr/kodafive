@@ -19,7 +19,7 @@ module.exports = async (client, message) => {
 
     const imageAttachment = message.attachments.find(a => a.contentType?.startsWith('image/'));
     if (!imageAttachment) {
-        return message.reply('📸 Manda o **print do depósito** como imagem pra eu registrar o comprovante.');
+        return message.reply('📸 O **print do depósito** é OBRIGATÓRIO pra validar a entrega. Manda a imagem aqui.');
     }
 
     await pool.query(
@@ -27,16 +27,38 @@ module.exports = async (client, message) => {
         [imageAttachment.url, delivery.id]
     );
 
-    await message.reply(`✅ **Comprovante registrado!** Sua entrega de \`${delivery.quantidade}x ${delivery.item_nome}\] foi salva com o print. A diretoria vai auditar.`);
+    await message.reply(`✅ **Comprovante registrado!** Sua entrega de \`${delivery.quantidade}x ${delivery.item_nome}\] foi validada com sucesso.`);
 
     const config = await pool.query('SELECT canal_log_farm_id FROM server_config WHERE guild_id = $1', [delivery.guild_id]);
     if (config.rows[0]?.canal_log_farm_id) {
         const logChannel = client.channels.cache.get(config.rows[0].canal_log_farm_id);
         if (logChannel) {
-            await logChannel.send({
-                content: `📋 **Nova Entrega com Comprovante**\n\n**Membro:** <@${message.author.id}>\n**Item:** ${delivery.item_nome}\n**Quantidade:** ${delivery.quantidade}x\n**Meta:** ${delivery.meta_quantidade.toLocaleString()} un\n**Data:** <t:${Math.floor(Date.now() / 1000)}:F>\n\n🖼️ **Comprovante original:**`,
-                files: [imageAttachment.url]
-            });
+            const userAvatar = message.author.displayAvatarURL({ extension: 'png', size: 256 });
+
+            const logPayload = [
+                {
+                    type: 17,
+                    accent_color: 16711680,
+                    components: [
+                        {
+                            type: 9,
+                            components: [
+                                { type: 10, content: `# 📋 Comprovante de Entrega\nRegistro de depósito auditado pela diretoria.` }
+                            ],
+                            accessory: { type: 11, media: { url: userAvatar } }
+                        },
+                        { type: 14, spacing: 1, divider: true },
+                        { type: 10, content: `**Membro:** <@${message.author.id}>\n**Item:** ${delivery.item_nome}\n**Quantidade:** \`${delivery.quantidade.toLocaleString()}x\`\n**Meta:** \`${delivery.meta_quantidade.toLocaleString()} un\`\n**Data:** <t:${Math.floor(Date.now() / 1000)}:F>` },
+                        { type: 14, spacing: 1, divider: true },
+                        { type: 10, content: "🖼️ **Comprovante original:**" },
+                        { type: 11, media: { url: imageAttachment.url } },
+                        { type: 14, spacing: 1, divider: true },
+                        { type: 10, content: "*💼 KODA STUDIOS • Sistema de Auditoria de Farm*" }
+                    ]
+                }
+            ];
+
+            await logChannel.send({ components: logPayload });
         }
     }
 };

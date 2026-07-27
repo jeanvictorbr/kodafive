@@ -23,8 +23,17 @@ const loadInteractions = (dir) => {
 loadInteractions(path.join(__dirname, '../interactions'));
 
 module.exports = async (client, interaction) => {
-    // Tratamento de Comandos / e Context Menu
-    if (interaction.isChatInputCommand() || interaction.isUserContextMenuCommand()) {
+    // Tratamento de Comandos /
+    if (interaction.isChatInputCommand()) {
+        const command = client.commands.get(interaction.commandName);
+        if (!command) return;
+        try { await command.execute(interaction); } 
+        catch (error) { console.error('[ERRO]', error); }
+        return;
+    }
+
+    // Tratamento de Context Menu (botão direito)
+    if (interaction.isUserContextMenuCommand()) {
         const command = client.commands.get(interaction.commandName);
         if (!command) return;
         try { await command.execute(client, interaction); } 

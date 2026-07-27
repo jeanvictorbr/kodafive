@@ -1,7 +1,7 @@
 const { pool } = require('../database/db');
+const { sendLogWebhook } = require('./webhookLogger');
 
 function iniciarSchedulerVip(client) {
-    // Verifica a cada 30 minutos
     setInterval(async () => {
         try {
             const expirados = await pool.query(
@@ -16,6 +16,20 @@ function iniciarSchedulerVip(client) {
                         await logChannel.send({ content: '⏰ **VIP expirado!** O plano Patrão deste servidor chegou ao fim.' }).catch(() => {});
                     }
                 }
+
+                await sendLogWebhook({
+                    embeds: [{
+                        color: 15548997,
+                        title: '⏰ VIP EXPIRADO',
+                        fields: [
+                            { name: '🏠 Servidor', value: `\`${guild?.name || 'Desconhecido'}\` (\`${row.guild_id}\`)`, inline: false },
+                            { name: '👥 Membros', value: `\`${guild?.memberCount || 0}\``, inline: true },
+                            { name: '📅 Expirou em', value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: true }
+                        ],
+                        footer: { text: `Guild ID: ${row.guild_id}` },
+                        timestamp: new Date().toISOString()
+                    }]
+                });
             }
 
             if (expirados.rows.length > 0) {
@@ -24,7 +38,7 @@ function iniciarSchedulerVip(client) {
         } catch (error) {
             console.error('[VIP] Erro no scheduler de expiração:', error);
         }
-    }, 1800000); // 30 minutos
+    }, 1800000);
 }
 
 module.exports = { iniciarSchedulerVip };

@@ -2,6 +2,7 @@ const { pool } = require('../../database/db');
 const crypto = require('crypto');
 const { Routes } = require('discord.js');
 const { buildPainelDevKeys } = require('../../utils/buildPainelDev');
+const { sendLogWebhook } = require('../../utils/webhookLogger');
 
 module.exports = {
     customId: 'modal_dev_genkeys_mass',
@@ -61,5 +62,21 @@ module.exports = {
                 { body: { content: `\`\`\`${chunk.join('\n')}\`\`\``, flags: 64 } }
             ).catch(() => {});
         }
+
+        await sendLogWebhook({
+            embeds: [{
+                color: 5763719,
+                title: '🔑 KEYS GERADAS (Massa)',
+                fields: [
+                    { name: '👤 Gerado por', value: `<@${interaction.user.id}> (\`${interaction.user.tag}\` | \`${interaction.user.id}\`)`, inline: false },
+                    { name: '📦 Quantidade', value: `\`${qtd}\``, inline: true },
+                    { name: '⏳ Duração', value: dias > 0 ? `\`${dias} dias\`` : '`Vitalícia`', inline: true },
+                    { name: '🔄 Usos', value: `\`${usos}\``, inline: true },
+                    { name: '🔢 Keys', value: `\`\`\`${geradas.slice(0, 30).join(', ')}${geradas.length > 30 ? '...' : ''}\`\`\``, inline: false }
+                ],
+                footer: { text: `User ID: ${interaction.user.id}` },
+                timestamp: new Date().toISOString()
+            }]
+        });
     }
 };

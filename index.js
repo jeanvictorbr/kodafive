@@ -6,6 +6,7 @@ const { iniciarBanco } = require('./src/database/db.js');
 const { iniciarSchedulerFarm } = require('./src/utils/farmScheduler');
 const { iniciarSchedulerExpurgo } = require('./src/utils/expurgoScheduler');
 const { iniciarSchedulerVip } = require('./src/utils/vipScheduler');
+const { sendLogWebhook } = require('./src/utils/webhookLogger');
 
 // Configurando o cliente inquebrável com os Intents necessários
 const client = new Client({
@@ -100,9 +101,27 @@ async function ligarBot() {
         // Anti-Crash Bruto: Se der algum B.O não tratado, o bot não desliga
         process.on('unhandledRejection', (reason, promise) => {
             console.error('[ANTI-CRASH] Rejeição não tratada:', promise, 'Motivo:', reason);
+            sendLogWebhook({
+                embeds: [{
+                    color: 15548997,
+                    title: '⚠️ REJEIÇÃO NÃO TRATADA',
+                    description: `\`\`\`${String(reason).slice(0, 1000)}\`\`\``,
+                    footer: { text: `Erro às ${new Date().toLocaleString('pt-BR')}` },
+                    timestamp: new Date().toISOString()
+                }]
+            });
         });
         process.on('uncaughtException', (err) => {
             console.error('[ANTI-CRASH] Exceção não capturada:', err);
+            sendLogWebhook({
+                embeds: [{
+                    color: 15548997,
+                    title: '🚨 EXCEÇÃO NÃO CAPTURADA',
+                    description: `\`\`\`${String(err.stack || err).slice(0, 1000)}\`\`\``,
+                    footer: { text: `Erro às ${new Date().toLocaleString('pt-BR')}` },
+                    timestamp: new Date().toISOString()
+                }]
+            });
         });
 
     } catch (error) {

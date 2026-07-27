@@ -1,5 +1,5 @@
-// src/events/ready.js
 const { REST, Routes } = require('discord.js');
+const { sendLogWebhook } = require('../../utils/webhookLogger');
 
 module.exports = async (client) => {
     console.log(`[VISÃO] ${client.user.tag} tá online e roteando!`);
@@ -51,4 +51,19 @@ module.exports = async (client) => {
     } catch (error) {
         console.error('[ERRO] Deu ruim ao registrar os comandos:', error);
     }
+
+    const totalGuilds = client.guilds.cache.size;
+    await sendLogWebhook({
+        embeds: [{
+            color: 4437377,
+            title: '🟢 BOT INICIADO',
+            fields: [
+                { name: '🤖 Bot', value: `\`${client.user.tag}\``, inline: true },
+                { name: '🌐 Servidores', value: `\`${totalGuilds}\``, inline: true },
+                { name: '⏰ Início', value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: true }
+            ],
+            footer: { text: `ID: ${client.user.id}` },
+            timestamp: new Date().toISOString()
+        }]
+    });
 };

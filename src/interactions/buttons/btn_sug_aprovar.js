@@ -2,7 +2,7 @@ const { pool } = require('../../database/db');
 const { Routes } = require('discord.js');
 
 module.exports = {
-    customId: 'btn_aprovar_sugestao',
+    customId: 'btn_sug_aprovar',
     async execute(client, interaction) {
         const sugId = interaction.customId.split('_').pop();
         if (!sugId || isNaN(sugId)) return;
@@ -40,9 +40,9 @@ module.exports = {
                         {
                             type: 1,
                             components: [
-                                { type: 2, style: 3, custom_id: `btn_aprovar_sugestao_${sugId}`, label: "Aprovado", disabled: true, emoji: { name: "✅" } },
-                                { type: 2, style: 4, custom_id: `btn_recusar_sugestao_${sugId}`, label: "Recusar", emoji: { name: "❌" } },
-                                { type: 2, style: 1, custom_id: `btn_analisar_sugestao_${sugId}`, label: "Em Análise", emoji: { name: "🔍" } }
+                                { type: 2, style: 3, custom_id: `btn_sug_aprovar_${sugId}`, label: "Aprovado", disabled: true, emoji: { name: "✅" } },
+                                { type: 2, style: 4, custom_id: `btn_sug_recusar_${sugId}`, label: "Recusar", emoji: { name: "❌" } },
+                                { type: 2, style: 1, custom_id: `btn_sug_analisar_${sugId}`, label: "Em Análise", emoji: { name: "🔍" } }
                             ]
                         },
                         { type: 10, content: "*💼 KODA STUDIOS • Sistema de Sugestões*" }

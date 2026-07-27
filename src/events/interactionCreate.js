@@ -50,6 +50,7 @@ module.exports = async (client, interaction) => {
     if (customId && customId.startsWith('modal_tribunal_multa_')) customId = 'modal_tribunal_multa';
     if (customId && customId.startsWith('modal_tribunal_advertencia_')) customId = 'modal_tribunal_advertencia';
     if (customId && customId.startsWith('modal_tribunal_suspensao_')) customId = 'modal_tribunal_suspensao';
+    if (customId && customId.startsWith('modal_add_tag_')) customId = 'modal_add_tag';
 
     const interactionHandler = interactions.get(customId);
 

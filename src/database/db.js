@@ -145,6 +145,17 @@ async function iniciarBanco() {
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS canal_log_tribunal_id VARCHAR(255);`);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS cargo_tribunal_id VARCHAR(255);`);
 
+        // 9. Tags Automáticas nos Apelidos
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS cargo_tags (
+                id SERIAL PRIMARY KEY,
+                guild_id VARCHAR(255) NOT NULL,
+                cargo_id VARCHAR(255) NOT NULL,
+                tag VARCHAR(100) NOT NULL,
+                UNIQUE(guild_id, cargo_id)
+            );
+        `);
+
         console.log('[BANCO] Estrutura completa e atualizada com sucesso no PostgreSQL. NADA FOI ZERADO!');
     } catch (error) {
         console.error('[ERRO] Falha ao atualizar o PostgreSQL:', error);

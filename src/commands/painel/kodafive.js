@@ -68,6 +68,15 @@ module.exports = {
                         accessory: { type: 2, style: 2, custom_id: "btn_modulo_tribunal", label: "Explorar" }
                     },
                     
+                    // --- MÓDULO 4: TAGS AUTOMÁTICAS ---
+                    {
+                        type: 9,
+                        components: [
+                            { type: 10, content: "### 🏷️ Tags Automáticas\nTags automáticas no apelido baseado em cargo da facção." }
+                        ],
+                        accessory: { type: 2, style: 2, custom_id: "btn_modulo_tags", label: "Explorar" }
+                    },
+                    
                     { type: 14, spacing: 1, divider: true }, // Outro separador antes dos controles
 
                     // --- CONTROLES DE PÁGINA E VIP ---

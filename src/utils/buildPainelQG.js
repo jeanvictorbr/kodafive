@@ -42,8 +42,8 @@ async function buildPainelQG(interaction, pagina = 1) {
         },
         {
             type: 9,
-            components: [{ type: 10, content: "### 🤝 Alianças & Rivais\nGerencie e exiba as relações da facção." }],
-            accessory: { type: 2, style: 2, custom_id: "btn_modulo_aliancas", label: "Explorar" }
+            components: [{ type: 10, content: `### 🤝 Alianças & Rivais 💎\n\`[REQUER VIP]\` Gerencie e exiba as relações da facção.` }],
+            accessory: { type: 2, style: 2, custom_id: "btn_modulo_aliancas", label: "Explorar", disabled: !isVip }
         },
         {
             type: 9,
@@ -57,8 +57,8 @@ async function buildPainelQG(interaction, pagina = 1) {
         },
         {
             type: 9,
-            components: [{ type: 10, content: "### 💡 Sugestões\nReceba e gerencie sugestões da rapaziada." }],
-            accessory: { type: 2, style: 2, custom_id: "btn_modulo_sugestoes", label: "Explorar" }
+            components: [{ type: 10, content: `### 💡 Sugestões 💎\n\`[REQUER VIP]\` Receba e gerencie sugestões da rapaziada.` }],
+            accessory: { type: 2, style: 2, custom_id: "btn_modulo_sugestoes", label: "Explorar", disabled: !isVip }
         }
     ];
 

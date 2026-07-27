@@ -1,9 +1,18 @@
 const { pool } = require('../database/db');
 
 async function buildPainelQG(interaction, pagina = 1) {
-    const config = await pool.query('SELECT is_vip FROM server_config WHERE guild_id = $1', [interaction.guildId]);
+    const config = await pool.query('SELECT is_vip, vip_expira_em FROM server_config WHERE guild_id = $1', [interaction.guildId]);
     const isVip = config.rows[0]?.is_vip || false;
-    const statusTexto = isVip ? '`Plano Patrão (VIP) 💎`' : '`Plano Cria (Grátis)`';
+    const vipExpira = config.rows[0]?.vip_expira_em;
+
+    let statusTexto = isVip ? '`Plano Patrão (VIP) 💎`' : '`Plano Cria (Grátis)`';
+    if (isVip && vipExpira) {
+        const ts = Math.floor(new Date(vipExpira).getTime() / 1000);
+        statusTexto += `\n> 📅 Expira <t:${ts}:R>`;
+    } else if (isVip) {
+        statusTexto += '\n> ♾️ Vitalício';
+    }
+    statusTexto += '\n> 💰 Para adquirir, entre em contato com a **KODA STUDIOS**';
 
     const baseComponents = [
         { type: 12, items: [{ media: { url: "https://i.ibb.co/68037k9/banner-placeholder.png" } }] },

@@ -1,6 +1,4 @@
-const { pool } = require('../../database/db');
 const { Routes } = require('discord.js');
-const { buildPainelDev } = require('../../utils/buildPainelDev');
 
 module.exports = {
     customId: 'btn_dev_vip_all_grant',
@@ -9,23 +7,28 @@ module.exports = {
             body: { type: 6 }
         });
 
-        const guilds = client.guilds.cache;
-        for (const [id] of guilds) {
-            await pool.query(
-                'INSERT INTO server_config (guild_id, is_vip) VALUES ($1, true) ON CONFLICT (guild_id) DO UPDATE SET is_vip = true',
-                [id]
-            ).catch(() => {});
-        }
-
-        const painel = await buildPainelDev(client);
         await client.rest.patch(
             `/webhooks/${interaction.applicationId}/${interaction.token}/messages/@original`,
-            { body: { flags: 32832, components: painel } }
+            {
+                body: {
+                    flags: 32832,
+                    components: [{
+                        type: 17,
+                        accent_color: 15844367,
+                        components: [
+                            { type: 10, content: "### ⚠️ Confirmar — Liberar VIP para TODOS\nTem certeza que deseja conceder VIP para **todos** os servidores onde o bot está?\n\nIsso inclui servidores que **não pagaram** pelo plano." },
+                            { type: 14, spacing: 1, divider: true },
+                            {
+                                type: 1,
+                                components: [
+                                    { type: 2, style: 3, custom_id: "btn_dev_confirm_all_grant", label: "✅ Sim, liberar VIP para todos", emoji: { name: "💎" } },
+                                    { type: 2, style: 4, custom_id: "btn_dev_cancel_all_grant", label: "❌ Cancelar", emoji: { name: "❌" } }
+                                ]
+                            }
+                        ]
+                    }]
+                }
+            }
         );
-
-        await client.rest.post(
-            `/webhooks/${interaction.applicationId}/${interaction.token}`,
-            { body: { content: `✅ VIP concedido a **${guilds.size}** servidores!`, flags: 64 } }
-        ).catch(() => {});
     }
 };

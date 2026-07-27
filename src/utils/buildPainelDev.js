@@ -5,7 +5,22 @@ function formatDate(d) {
     return new Date(d).toLocaleDateString('pt-BR');
 }
 
+function formatUptime(segundos) {
+    const d = Math.floor(segundos / 86400);
+    const h = Math.floor((segundos % 86400) / 3600);
+    const m = Math.floor((segundos % 3600) / 60);
+    const s = Math.floor(segundos % 60);
+    const partes = [];
+    if (d > 0) partes.push(`${d}d`);
+    if (h > 0) partes.push(`${h}h`);
+    if (m > 0) partes.push(`${m}m`);
+    partes.push(`${s}s`);
+    return partes.join(' ');
+}
+
 async function buildPainelDev(client, pagina = 1, guildId = null) {
+    client.startTime = client.startTime || Date.now();
+
     if (guildId) return buildPainelDevServer(client, guildId);
 
     const totalGuilds = client.guilds.cache.size;
@@ -13,6 +28,12 @@ async function buildPainelDev(client, pagina = 1, guildId = null) {
     const keysTotal = (await pool.query('SELECT COUNT(*)::int as total FROM vip_keys')).rows[0].total;
     const keysUsadas = (await pool.query('SELECT COUNT(*)::int as total FROM vip_keys WHERE usos_atual >= usos_max')).rows[0].total;
     const keysDisponiveis = keysTotal - keysUsadas;
+
+    const keysAtivadasHoje = (await pool.query(
+        "SELECT COUNT(*)::int as total FROM vip_keys WHERE usos_atual > 0 AND gerada_em::date = CURRENT_DATE"
+    )).rows[0].total;
+
+    const uptime = formatUptime(process.uptime());
 
     const porPagina = 10;
     const guilds = [...client.guilds.cache.values()].sort((a, b) => b.memberCount - a.memberCount);
@@ -30,7 +51,8 @@ async function buildPainelDev(client, pagina = 1, guildId = null) {
         const expira = vipMap[g.id];
         let expiraTexto = '';
         if (isVip && expira) {
-            expiraTexto = ` — expira <t:${Math.floor(new Date(expira).getTime() / 1000)}:R>`;
+            const ts = Math.floor(new Date(expira).getTime() / 1000);
+            expiraTexto = ` — expira <t:${ts}:R>`;
         }
         listaServidores += `> ${isVip ? '💎' : '⬜'} **${g.name}** — ${g.memberCount} membros${expiraTexto}\n`;
     }
@@ -50,7 +72,7 @@ async function buildPainelDev(client, pagina = 1, guildId = null) {
             { type: 14, spacing: 1, divider: true },
             {
                 type: 10,
-                content: `### 📊 Visão Geral\n> 🌐 Servidores: **${totalGuilds}**\n> 💎 VIPs: **${vips}**\n> 🔑 Keys: **${keysDisponiveis}** disponíveis / **${keysUsadas}** esgotadas`
+                content: `### 📊 Visão Geral\n> 🌐 Servidores: **${totalGuilds}** • 💎 VIPs: **${vips}**\n> 🔑 Keys: **${keysDisponiveis}** disponíveis / **${keysUsadas}** esgotadas\n> 📈 Ativações hoje: **${keysAtivadasHoje}** • ⏱ Uptime: **${uptime}**`
             },
             { type: 14, spacing: 1, divider: true },
             {
@@ -62,6 +84,7 @@ async function buildPainelDev(client, pagina = 1, guildId = null) {
                 type: 1,
                 components: [
                     { type: 2, style: 2, custom_id: "btn_dev_select_server", label: "🔍 Ver Servidor", emoji: { name: "🔍" } },
+                    { type: 2, style: 2, custom_id: "btn_dev_refresh", label: "🔄 Atualizar", emoji: { name: "🔄" } },
                     { type: 2, style: 2, custom_id: `btn_dev_pag_${pagina - 1}`, label: "⬅️", disabled: pagina <= 1 },
                     { type: 2, style: 2, custom_id: "page_indicator_dev", label: `${pagina}/${totalPaginas}`, disabled: true },
                     { type: 2, style: 2, custom_id: `btn_dev_pag_${pagina + 1}`, label: "➡️", disabled: pagina >= totalPaginas }
@@ -111,6 +134,10 @@ async function buildPainelDevServer(client, guildId) {
 
     const membros = (await pool.query('SELECT COUNT(*)::int as total FROM membros WHERE guild_id = $1', [guildId])).rows[0].total;
     const sugestoes = (await pool.query('SELECT COUNT(*)::int as total FROM sugestoes WHERE guild_id = $1', [guildId])).rows[0].total;
+    const fichas = (await pool.query('SELECT COUNT(*)::int as total FROM recrutamento WHERE guild_id = $1', [guildId])).rows[0].total;
+    const autoRespostas = (await pool.query('SELECT COUNT(*)::int as total FROM auto_resposta WHERE guild_id = $1', [guildId])).rows[0].total;
+    const tags = (await pool.query('SELECT COUNT(*)::int as total FROM cargo_tags WHERE guild_id = $1', [guildId])).rows[0].total;
+    const aliancas = (await pool.query('SELECT COUNT(*)::int as total FROM aliancas WHERE guild_id = $1', [guildId])).rows[0].total;
 
     let vipTexto = isVip ? '✅ Sim' : '❌ Não';
     if (isVip && vipExpira) {
@@ -129,7 +156,7 @@ async function buildPainelDevServer(client, guildId) {
             { type: 14, spacing: 1, divider: true },
             {
                 type: 10,
-                content: `### 📊 Informações\n> 💎 **VIP:** ${vipTexto}\n> 📋 Membros no banco: **${membros}**\n> 💡 Sugestões: **${sugestoes}**\n> 📅 Criado em: ${formatDate(guild.createdAt)}`
+                content: `### 📊 Informações\n> 💎 **VIP:** ${vipTexto}\n> 📋 Membros no banco: **${membros}**\n> 📝 Fichas: **${fichas}** • 💡 Sugestões: **${sugestoes}**\n> 🤖 Auto-respostas: **${autoRespostas}** • 🏷️ Tags: **${tags}**\n> 🤝 Alianças: **${aliancas}**\n> 📅 Criado em: ${formatDate(guild.createdAt)}`
             },
             { type: 14, spacing: 1, divider: true },
             {
@@ -160,6 +187,14 @@ async function buildPainelDevKeys(client) {
         "SELECT COUNT(*)::int as total, SUM(CASE WHEN usos_atual >= usos_max THEN 1 ELSE 0 END)::int as usadas FROM vip_keys"
     )).rows[0];
 
+    const ativadasHoje = (await pool.query(
+        "SELECT COUNT(*)::int as total FROM vip_keys WHERE usos_atual > 0 AND gerada_em::date = CURRENT_DATE"
+    )).rows[0].total;
+
+    const ativadasTotal = (await pool.query(
+        "SELECT COUNT(*)::int as total FROM vip_keys WHERE usos_atual > 0"
+    )).rows[0].total;
+
     let listaKeys = '';
     for (const k of keys.rows) {
         const usos = `${k.usos_atual}/${k.usos_max}`;
@@ -178,7 +213,7 @@ async function buildPainelDevKeys(client) {
             { type: 14, spacing: 1, divider: true },
             {
                 type: 10,
-                content: `### 📊 Estatísticas\n> 🔑 Total: **${stats.total}**\n> 🟢 Disponíveis: **${stats.total - stats.usadas}**\n> 🔴 Esgotadas: **${stats.usadas}**`
+                content: `### 📊 Estatísticas\n> 🔑 Total: **${stats.total}**\n> 🟢 Disponíveis: **${stats.total - stats.usadas}**\n> 🔴 Esgotadas: **${stats.usadas}**\n> 📈 Ativações hoje: **${ativadasHoje}** • Total: **${ativadasTotal}**`
             },
             { type: 14, spacing: 1, divider: true },
             { type: 10, content: `### 📋 Últimas Keys\n${listaKeys}` },
@@ -193,7 +228,7 @@ async function buildPainelDevKeys(client) {
             {
                 type: 1,
                 components: [
-                    { type: 2, style: 4, custom_id: "btn_dev_back", label: "🔙 Voltar", emoji: { name: "🔙" } }
+                    { type: 2, style: 2, custom_id: "btn_dev_back_keys", label: "🔙 Voltar ao Painel", emoji: { name: "🔙" } }
                 ]
             },
             { type: 10, content: "*💼 KODA STUDIOS • Central de Controle*" }

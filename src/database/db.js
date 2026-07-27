@@ -199,6 +199,28 @@ async function iniciarBanco() {
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS cargo_alerta_id VARCHAR(255);`);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS faq_ativo BOOLEAN DEFAULT true;`);
 
+        // 13. Sugestões
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS config_sugestao (
+                guild_id VARCHAR(255) PRIMARY KEY,
+                canal_analise_id VARCHAR(255)
+            );
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS sugestoes (
+                id SERIAL PRIMARY KEY,
+                guild_id VARCHAR(255) NOT NULL,
+                user_id VARCHAR(255) NOT NULL,
+                titulo VARCHAR(255) NOT NULL,
+                descricao TEXT NOT NULL,
+                status VARCHAR(50) DEFAULT 'pendente',
+                mensagem_analise_id VARCHAR(255),
+                thread_id VARCHAR(255),
+                criada_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
         console.log('[BANCO] Estrutura completa e atualizada com sucesso no PostgreSQL. NADA FOI ZERADO!');
     } catch (error) {
         console.error('[ERRO] Falha ao atualizar o PostgreSQL:', error);

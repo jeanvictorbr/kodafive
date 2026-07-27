@@ -54,6 +54,11 @@ async function buildPainelQG(interaction, pagina = 1) {
             type: 9,
             components: [{ type: 10, content: "### 🧹 Expurgo Automático\nRemova cargos de membros inativos." }],
             accessory: { type: 2, style: 2, custom_id: "btn_modulo_expurgo", label: "Explorar" }
+        },
+        {
+            type: 9,
+            components: [{ type: 10, content: "### 💡 Sugestões\nReceba e gerencie sugestões da rapaziada." }],
+            accessory: { type: 2, style: 2, custom_id: "btn_modulo_sugestoes", label: "Explorar" }
         }
     ];
 

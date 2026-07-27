@@ -42,8 +42,8 @@ function iniciarSchedulerFarm(client) {
                     // 1. Zera/Deleta todas as entregas de farm dessa guilda
                     await pool.query('DELETE FROM entregas_farm WHERE guild_id = $1', [guildId]);
 
-                    // 2. Atualiza a data de criação de todas as metas da guilda para o momento atual (reiniciando o ciclo)
-                    await pool.query('UPDATE meta_farm_config SET criado_em = CURRENT_TIMESTAMP WHERE guild_id = $1', [guildId]);
+                    // 2. Reseta o progresso e a data de criação das metas
+                    await pool.query('UPDATE meta_farm_config SET criado_em = CURRENT_TIMESTAMP, meta_atual = 0 WHERE guild_id = $1', [guildId]);
 
                     console.log(`[FARM] Placar de farm da guilda ${guildId} resetado com sucesso para um novo ciclo!`);
                 }

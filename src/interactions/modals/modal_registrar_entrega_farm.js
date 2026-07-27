@@ -1,5 +1,6 @@
 const { pool } = require('../../database/db');
 const { atualizarVitrineFarm } = require('../../utils/vitrineFarm');
+const { verificarMetasBatidas } = require('../../utils/verificarMetasBatidas');
 
 module.exports = {
     customId: 'modal_registrar_entrega_farm',
@@ -27,11 +28,17 @@ module.exports = {
             );
 
             await interaction.reply({
-                content: `✅ **Entrega de ${quantidade.toLocaleString()}x ${itemName} registrada com sucesso!**\n\n📌 *Dica da Diretoria:* Se o seu cargo exige comprovante, mande o print do depósito/baú aqui neste canal marcando a staff.`,
+                content: `✅ **Entrega de ${quantidade.toLocaleString()}x ${itemName} registrada com sucesso!**\n\n📸 Agora **envia o print do depósito** na nossa DM pra gente salvar o comprovante.`,
                 flags: 64
             });
 
             await atualizarVitrineFarm(client, guildId);
+            await verificarMetasBatidas(client, guildId);
+
+            const user = await client.users.fetch(userId).catch(() => null);
+            if (user) {
+                await user.send(`📸 **Comprovante de Entrega**\n\nSua entrega de \`${quantidade.toLocaleString()}x ${itemName}\] foi registrada! Manda o **print do depósito/baú** como imagem aqui mesmo pra gente anexar ao registro.\n\n*Se não tiver comprovante, só ignora essa mensagem.*`).catch(() => {});
+            }
 
         } catch (error) {
             console.error('[ERRO] Falha ao registrar entrega:', error);

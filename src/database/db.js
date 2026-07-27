@@ -28,6 +28,7 @@ async function iniciarBanco() {
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS canal_ponto_id VARCHAR(255);`);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS is_vip BOOLEAN DEFAULT false;`);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS ciclo_farm VARCHAR(50) DEFAULT 'semanal';`);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS canal_log_farm_id VARCHAR(255);`);
         
         // 🌟 ADDED: Colunas para o Sistema de Sincronia da Vitrine
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS canal_vitrine_id VARCHAR(255);`);

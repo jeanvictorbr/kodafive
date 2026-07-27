@@ -10,7 +10,8 @@ const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.GuildMembers // Necessário pra poder chamar no privado depois
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.DirectMessages // Pra receber prints de comprovante via DM
     ]
 });
 

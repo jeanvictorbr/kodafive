@@ -62,6 +62,7 @@ async function iniciarBanco() {
                 data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
+        await pool.query(`ALTER TABLE entregas_farm ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'pendente';`);
 
         // 3. Tabela do Relógio de Ponto
         await pool.query(`

@@ -5,7 +5,7 @@ async function verificarMetasBatidas(client, guildId) {
         SELECT m.id, m.item_nome, m.meta_quantidade, m.meta_atual,
                COALESCE(SUM(e.quantidade), 0) as total_entregue
         FROM meta_farm_config m
-        LEFT JOIN entregas_farm e ON e.meta_id = m.id
+        LEFT JOIN entregas_farm e ON e.meta_id = m.id AND e.status = 'validado'
         WHERE m.guild_id = $1
         GROUP BY m.id, m.item_nome, m.meta_quantidade, m.meta_atual
     `, [guildId]);

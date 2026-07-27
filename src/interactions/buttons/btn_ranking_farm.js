@@ -12,7 +12,7 @@ module.exports = {
                 SELECT m.id, m.item_nome, m.meta_quantidade,
                        COALESCE(SUM(e.quantidade), 0) as entregue
                 FROM meta_farm_config m
-                LEFT JOIN entregas_farm e ON e.meta_id = m.id AND e.user_id = $1
+                LEFT JOIN entregas_farm e ON e.meta_id = m.id AND e.user_id = $1 AND e.status = 'validado'
                 WHERE m.guild_id = $2
                 GROUP BY m.id, m.item_nome, m.meta_quantidade
                 ORDER BY m.id ASC

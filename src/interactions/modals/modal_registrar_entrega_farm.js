@@ -23,21 +23,18 @@ module.exports = {
             const itemName = metaCheck.rows[0].item_nome;
 
             await pool.query(
-                "INSERT INTO entregas_farm (guild_id, user_id, meta_id, quantidade) VALUES ($1, $2, $3, $4)",
+                "INSERT INTO entregas_farm (guild_id, user_id, meta_id, quantidade, status) VALUES ($1, $2, $3, $4, 'pendente')",
                 [guildId, userId, metaId, quantidade]
             );
 
             await interaction.reply({
-                content: `📸 **COMPROVANTE OBRIGATÓRIO!**\n\nSua entrega de \`${quantidade.toLocaleString()}x ${itemName}\] foi **registrada**, mas **não será validada** até você enviar o **print do depósito** como comprovante.\n\n✅ Envie o print na nossa **DM privada** agora mesmo para concluir.\n❌ Sem comprovante, a entrega será ignorada.`,
+                content: `📸 **COMPROVANTE OBRIGATÓRIO!**\n\nSua entrega de \`${quantidade.toLocaleString()}x ${itemName}\] foi **pré-registrada**, mas **não será validada** até você enviar o **print do depósito** como comprovante.\n\n📩 Envie o print na nossa **DM privada** agora mesmo.\n❌ Sem comprovante, a entrega será descartada no fim do ciclo.`,
                 flags: 64
             });
 
-            await atualizarVitrineFarm(client, guildId);
-            await verificarMetasBatidas(client, guildId);
-
             const user = await client.users.fetch(userId).catch(() => null);
             if (user) {
-                await user.send(`📸 **COMPROVANTE OBRIGATÓRIO!**\n\nSua entrega de \`${quantidade.toLocaleString()}x ${itemName}\] foi registrada, mas **precisa do print do depósito** pra ser validada.\n\n👉 Manda o **print** aqui mesmo como imagem.\n⏳ Você tem até o fim do ciclo pra enviar.\n❌ Sem comprovante, a entrega não conta.`).catch(() => {});
+                await user.send(`📸 **COMPROVANTE OBRIGATÓRIO!**\n\nSua entrega de \`${quantidade.toLocaleString()}x ${itemName}\] foi pré-registrada, mas **precisa do print do depósito** pra ser validada.\n\n👉 Manda o **print** aqui mesmo como imagem.\n⏳ Você tem até o fim do ciclo.\n❌ Sem comprovante, a entrega não conta.`).catch(() => {});
             }
 
         } catch (error) {

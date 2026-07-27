@@ -1,4 +1,6 @@
 const { pool } = require('../database/db');
+const { atualizarVitrineFarm } = require('../utils/vitrineFarm');
+const { verificarMetasBatidas } = require('../utils/verificarMetasBatidas');
 
 module.exports = async (client, message) => {
     if (message.author.bot) return;
@@ -8,7 +10,7 @@ module.exports = async (client, message) => {
         SELECT ef.id, ef.quantidade, mfc.item_nome, mfc.meta_quantidade, ef.guild_id
         FROM entregas_farm ef
         JOIN meta_farm_config mfc ON ef.meta_id = mfc.id
-        WHERE ef.user_id = $1 AND ef.comprovante_url IS NULL
+        WHERE ef.user_id = $1 AND ef.status = 'pendente'
         ORDER BY ef.data_registro DESC
         LIMIT 1
     `, [message.author.id]);
@@ -23,11 +25,14 @@ module.exports = async (client, message) => {
     }
 
     await pool.query(
-        'UPDATE entregas_farm SET comprovante_url = $1 WHERE id = $2',
+        "UPDATE entregas_farm SET status = 'validado', comprovante_url = $1 WHERE id = $2",
         [imageAttachment.url, delivery.id]
     );
 
     await message.reply(`✅ **Comprovante registrado!** Sua entrega de \`${delivery.quantidade}x ${delivery.item_nome}\] foi validada com sucesso.`);
+
+    await atualizarVitrineFarm(client, delivery.guild_id);
+    await verificarMetasBatidas(client, delivery.guild_id);
 
     const config = await pool.query('SELECT canal_log_farm_id FROM server_config WHERE guild_id = $1', [delivery.guild_id]);
     if (config.rows[0]?.canal_log_farm_id) {
@@ -50,8 +55,13 @@ module.exports = async (client, message) => {
                         { type: 14, spacing: 1, divider: true },
                         { type: 10, content: `**Membro:** <@${message.author.id}>\n**Item:** ${delivery.item_nome}\n**Quantidade:** \`${delivery.quantidade.toLocaleString()}x\`\n**Meta:** \`${delivery.meta_quantidade.toLocaleString()} un\`\n**Data:** <t:${Math.floor(Date.now() / 1000)}:F>` },
                         { type: 14, spacing: 1, divider: true },
-                        { type: 10, content: "🖼️ **Comprovante original:**" },
-                        { type: 11, media: { url: imageAttachment.url } },
+                        {
+                            type: 9,
+                            components: [
+                                { type: 10, content: "🖼️ **Comprovante original:**" }
+                            ],
+                            accessory: { type: 11, media: { url: imageAttachment.url } }
+                        },
                         { type: 14, spacing: 1, divider: true },
                         { type: 10, content: "*💼 KODA STUDIOS • Sistema de Auditoria de Farm*" }
                     ]

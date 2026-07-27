@@ -9,7 +9,7 @@ module.exports = {
         if (!guildId) return;
 
         await pool.query(
-            'UPDATE server_config SET is_vip = false WHERE guild_id = $1',
+            "UPDATE server_config SET is_vip = false, vip_expira_em = NULL, vip_origem = 'key', vip_doado_por = NULL, vip_doado_em = NULL WHERE guild_id = $1",
             [guildId]
         );
 

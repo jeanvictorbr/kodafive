@@ -18,6 +18,13 @@ function formatUptime(segundos) {
     return partes.join(' ');
 }
 
+function origemLabel(origem) {
+    if (origem === 'doacao') return '🎁 Doação';
+    if (origem === 'manual') return '🛠️ Manual';
+    if (origem === 'key') return '🔑 Key';
+    return '❓ Desconhecida';
+}
+
 async function buildPainelDev(client, pagina = 1, guildId = null) {
     client.startTime = client.startTime || Date.now();
 
@@ -25,6 +32,7 @@ async function buildPainelDev(client, pagina = 1, guildId = null) {
 
     const totalGuilds = client.guilds.cache.size;
     const vips = (await pool.query('SELECT COUNT(*)::int as total FROM server_config WHERE is_vip = true')).rows[0].total;
+    const vipsDoados = (await pool.query("SELECT COUNT(*)::int as total FROM server_config WHERE is_vip = true AND vip_origem = 'doacao'")).rows[0].total;
     const keysTotal = (await pool.query('SELECT COUNT(*)::int as total FROM vip_keys')).rows[0].total;
     const keysUsadas = (await pool.query('SELECT COUNT(*)::int as total FROM vip_keys WHERE usos_atual >= usos_max')).rows[0].total;
     const keysDisponiveis = keysTotal - keysUsadas;
@@ -41,20 +49,26 @@ async function buildPainelDev(client, pagina = 1, guildId = null) {
     const inicio = (pagina - 1) * porPagina;
     const pageGuilds = guilds.slice(inicio, inicio + porPagina);
 
-    const vipData = (await pool.query('SELECT guild_id, vip_expira_em FROM server_config WHERE is_vip = true')).rows;
+    const vipData = (await pool.query('SELECT guild_id, vip_expira_em, vip_origem FROM server_config WHERE is_vip = true')).rows;
     const vipMap = {};
-    for (const v of vipData) vipMap[v.guild_id] = v.vip_expira_em;
+    const origemMap = {};
+    for (const v of vipData) {
+        vipMap[v.guild_id] = v.vip_expira_em;
+        origemMap[v.guild_id] = v.vip_origem;
+    }
 
     let listaServidores = '';
     for (const g of pageGuilds) {
         const isVip = g.id in vipMap;
         const expira = vipMap[g.id];
+        const origem = origemMap[g.id];
         let expiraTexto = '';
         if (isVip && expira) {
             const ts = Math.floor(new Date(expira).getTime() / 1000);
             expiraTexto = ` — expira <t:${ts}:R>`;
         }
-        listaServidores += `> ${isVip ? '💎' : '⬜'} **${g.name}** — ${g.memberCount} membros${expiraTexto}\n`;
+        const badge = isVip ? origemLabel(origem) : '⬜';
+        listaServidores += `> ${badge} **${g.name}** — ${g.memberCount} membros${expiraTexto}\n`;
     }
     if (!listaServidores) listaServidores = '> *Nenhum servidor encontrado.*';
 
@@ -72,7 +86,7 @@ async function buildPainelDev(client, pagina = 1, guildId = null) {
             { type: 14, spacing: 1, divider: true },
             {
                 type: 10,
-                content: `### 📊 Visão Geral\n> 🌐 Servidores: **${totalGuilds}** • 💎 VIPs: **${vips}**\n> 🔑 Keys: **${keysDisponiveis}** disponíveis / **${keysUsadas}** esgotadas\n> 📈 Ativações hoje: **${keysAtivadasHoje}** • ⏱ Uptime: **${uptime}**`
+                content: `### 📊 Visão Geral\n> 🌐 Servidores: **${totalGuilds}** • 💎 VIPs: **${vips}** (🔑 ${vips - vipsDoados} key + 🎁 ${vipsDoados} doação)\n> 🔑 Keys: **${keysDisponiveis}** disponíveis / **${keysUsadas}** esgotadas\n> 📈 Ativações hoje: **${keysAtivadasHoje}** • ⏱ Uptime: **${uptime}**`
             },
             { type: 14, spacing: 1, divider: true },
             {
@@ -100,6 +114,13 @@ async function buildPainelDev(client, pagina = 1, guildId = null) {
             {
                 type: 1,
                 components: [
+                    { type: 2, style: 2, custom_id: "btn_dev_doar_vip", label: "🎁 Doar VIP", emoji: { name: "🎁" } },
+                    { type: 2, style: 4, custom_id: "btn_dev_remover_doados", label: "⛔ Remover VIPs Doados", emoji: { name: "⛔" } }
+                ]
+            },
+            {
+                type: 1,
+                components: [
                     { type: 2, style: 2, custom_id: "btn_dev_keys", label: "🔑 Gerenciar Keys", emoji: { name: "🔑" } }
                 ]
             },
@@ -120,9 +141,12 @@ async function buildPainelDevServer(client, guildId) {
         }];
     }
 
-    const config = (await pool.query('SELECT is_vip, vip_expira_em FROM server_config WHERE guild_id = $1', [guildId])).rows[0] || {};
+    const config = (await pool.query('SELECT is_vip, vip_expira_em, vip_origem, vip_doado_por, vip_doado_em FROM server_config WHERE guild_id = $1', [guildId])).rows[0] || {};
     const isVip = config.is_vip || false;
     const vipExpira = config.vip_expira_em;
+    const vipOrigem = config.vip_origem || 'key';
+    const vipDoadoPor = config.vip_doado_por;
+    const vipDoadoEm = config.vip_doado_em;
 
     let ownerTag = 'Desconhecido';
     try {
@@ -139,9 +163,15 @@ async function buildPainelDevServer(client, guildId) {
     const tags = (await pool.query('SELECT COUNT(*)::int as total FROM cargo_tags WHERE guild_id = $1', [guildId])).rows[0].total;
     const aliancas = (await pool.query('SELECT COUNT(*)::int as total FROM aliancas WHERE guild_id = $1', [guildId])).rows[0].total;
 
-    let vipTexto = isVip ? '✅ Sim' : '❌ Não';
+    let vipTexto = isVip ? `${origemLabel(vipOrigem)}` : '❌ Não';
     if (isVip && vipExpira) {
         vipTexto += ` — expira <t:${Math.floor(new Date(vipExpira).getTime() / 1000)}:R>`;
+    }
+    if (isVip && vipOrigem === 'doacao' && vipDoadoPor) {
+        vipTexto += `\n> 🎁 Doado por: <@${vipDoadoPor}>`;
+        if (vipDoadoEm) {
+            vipTexto += ` em ${formatDate(vipDoadoEm)}`;
+        }
     }
 
     return [{
@@ -161,11 +191,18 @@ async function buildPainelDevServer(client, guildId) {
             { type: 14, spacing: 1, divider: true },
             {
                 type: 1,
-                components: [
-                    isVip
-                        ? { type: 2, style: 4, custom_id: `btn_dev_vip_revoke_${guildId}`, label: "⛔ Remover VIP", emoji: { name: "⛔" } }
-                        : { type: 2, style: 3, custom_id: `btn_dev_vip_grant_${guildId}`, label: "💎 Conceder VIP", emoji: { name: "💎" } }
-                ]
+                components: (() => {
+                    const btns = [];
+                    if (isVip && vipOrigem === 'doacao') {
+                        btns.push({ type: 2, style: 4, custom_id: `btn_dev_vip_revoke_${guildId}`, label: "⛔ Remover Doação", emoji: { name: "⛔" } });
+                    } else if (isVip) {
+                        btns.push({ type: 2, style: 4, custom_id: `btn_dev_vip_revoke_${guildId}`, label: "⛔ Remover VIP", emoji: { name: "⛔" } });
+                    } else {
+                        btns.push({ type: 2, style: 3, custom_id: `btn_dev_vip_grant_${guildId}`, label: "💎 Conceder VIP", emoji: { name: "💎" } });
+                    }
+                    btns.push({ type: 2, style: 2, custom_id: "btn_dev_doar_vip", label: "🎁 Doar VIP", emoji: { name: "🎁" } });
+                    return btns;
+                })()
             },
             {
                 type: 1,

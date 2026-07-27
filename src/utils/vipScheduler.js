@@ -5,7 +5,7 @@ function iniciarSchedulerVip(client) {
     setInterval(async () => {
         try {
             const expirados = await pool.query(
-                "UPDATE server_config SET is_vip = false, vip_expira_em = NULL WHERE is_vip = true AND vip_expira_em IS NOT NULL AND vip_expira_em < NOW() RETURNING guild_id"
+                "UPDATE server_config SET is_vip = false, vip_expira_em = NULL, vip_origem = 'key', vip_doado_por = NULL, vip_doado_em = NULL WHERE is_vip = true AND vip_expira_em IS NOT NULL AND vip_expira_em < NOW() RETURNING guild_id"
             );
 
             for (const row of expirados.rows) {

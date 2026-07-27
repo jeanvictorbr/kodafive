@@ -35,14 +35,14 @@ module.exports = {
             if (keyData.dias_validade > 0) {
                 expiraEm = new Date(Date.now() + keyData.dias_validade * 86400000);
                 await pool.query(
-                    'UPDATE server_config SET is_vip = true, vip_expira_em = $1 WHERE guild_id = $2',
-                    [expiraEm, guildId]
+                    'UPDATE server_config SET is_vip = true, vip_expira_em = $1, vip_origem = $2, vip_doado_por = NULL, vip_doado_em = NULL WHERE guild_id = $3',
+                    [expiraEm, 'key', guildId]
                 );
                 duracaoTexto = `\n📅 **Expira em:** <t:${Math.floor(expiraEm.getTime() / 1000)}:R>`;
             } else {
                 await pool.query(
-                    'UPDATE server_config SET is_vip = true, vip_expira_em = NULL WHERE guild_id = $1',
-                    [guildId]
+                    'UPDATE server_config SET is_vip = true, vip_expira_em = NULL, vip_origem = $2, vip_doado_por = NULL, vip_doado_em = NULL WHERE guild_id = $1',
+                    [guildId, 'key']
                 );
                 duracaoTexto = '\n♾️ **Duração:** Vitalícia';
             }

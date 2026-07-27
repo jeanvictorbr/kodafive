@@ -9,7 +9,7 @@ module.exports = {
         if (!guildId) return;
 
         await pool.query(
-            'INSERT INTO server_config (guild_id, is_vip) VALUES ($1, true) ON CONFLICT (guild_id) DO UPDATE SET is_vip = true',
+            "INSERT INTO server_config (guild_id, is_vip, vip_origem) VALUES ($1, true, 'manual') ON CONFLICT (guild_id) DO UPDATE SET is_vip = true, vip_origem = 'manual'",
             [guildId]
         );
 

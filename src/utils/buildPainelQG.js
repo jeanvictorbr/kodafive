@@ -4,7 +4,7 @@ const MODULOS_PAG1 = [
     { nome: "### 📋 Gestão da Rapaziada\nRecrutamento, Ponto, Metas de Farm e RH.", id: "btn_modulo_recrutamento", livre: true },
     { nome: "### 📋 Escala de Serviço\nOrganize quem cobre cada função (plantão).", id: "btn_modulo_plantao", livre: true },
     { nome: "### ⚖️ Tribunal do Crime\nSistema de multas, cobranças, strikes e XP.", id: "btn_modulo_tribunal", livre: true },
-    { nome: "### 🏷️ Tags Automáticas 💎\n`[REQUER VIP]` Tags automáticas no apelido.", id: "btn_modulo_tags", vip: true }
+    { nome: "### 🏷️ Tags Automáticas\nTags automáticas no apelido baseadas em cargo.", id: "btn_modulo_tags", livre: true }
 ];
 
 const MODULOS_PAG2 = [

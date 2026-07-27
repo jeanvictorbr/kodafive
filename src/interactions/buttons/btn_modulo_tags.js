@@ -5,10 +5,6 @@ const { buildPainelTags } = require('../../utils/buildPainelTags');
 module.exports = {
     customId: 'btn_modulo_tags',
     async execute(client, interaction) {
-        const config = await pool.query('SELECT is_vip FROM server_config WHERE guild_id = $1', [interaction.guildId]);
-        if (!config.rows[0]?.is_vip) {
-            return interaction.reply({ content: '❌ Este módulo é exclusivo para servidores **VIP**. Resgate uma chave no QG.', flags: 64 });
-        }
         const pagina = parseInt(interaction.customId.match(/_p(\d+)$/)?.[1]) || 1;
         try {
             const painel = await buildPainelTags(interaction, pagina);

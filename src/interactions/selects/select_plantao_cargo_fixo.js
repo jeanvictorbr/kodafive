@@ -38,7 +38,7 @@ module.exports = {
         }
 
         await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
-            body: { type: 7, data: { flags: 64, components: [{
+            body: { type: 7, data: { flags: 32832, components: [{
                 type: 17, accent_color: 4437377,
                 components: [
                     { type: 10, content: `# ✅ Agendado!\n<@${userId}> vai cobrir **${horaInicio} às ${horaFim}** como **${cargo}** hoje.` },

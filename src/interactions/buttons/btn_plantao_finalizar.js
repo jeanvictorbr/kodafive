@@ -15,7 +15,7 @@ module.exports = {
 
         if (result.rows.length === 0) {
             return client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
-                body: { type: 7, data: { flags: 64, components: [{
+                body: { type: 7, data: { flags: 32832, components: [{
                     type: 17, accent_color: 15548997,
                     components: [
                         { type: 10, content: '# ⚠️ Tu não tem plantão ativo\nVai no painel e clica em **✅ Assumir Agora** primeiro.' }
@@ -48,7 +48,7 @@ module.exports = {
         }
 
         await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
-            body: { type: 7, data: { flags: 64, components: [{
+            body: { type: 7, data: { flags: 32832, components: [{
                 type: 17, accent_color: 15548997,
                 components: [
                     { type: 10, content: `# 🔴 Plantão Encerrado\n<@${userId}> — **${cargo}** — duração: **${duracao}**\n\nValeu pelo tempo de atividade!` }

@@ -22,7 +22,7 @@ module.exports = {
 
         if (jaTem.rows.length > 0) {
             return client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
-                body: { type: 7, data: { flags: 64, components: [{
+                body: { type: 7, data: { flags: 32832, components: [{
                     type: 17, accent_color: 15548997,
                     components: [
                         { type: 10, content: `# ⚠️ Já tás nesse horário\nTu já marcou esse bloco de **${horaInicio} às ${horaFim}** hoje.` }
@@ -50,7 +50,7 @@ module.exports = {
             return client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
                 body: {
                     type: 7, data: {
-                        flags: 64,
+                        flags: 32832,
                         components: [{
                             type: 17, accent_color: 3447003,
                             components: [
@@ -73,7 +73,7 @@ module.exports = {
         }
 
         return client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
-            body: { type: 7, data: { flags: 64, components: [{
+            body: { type: 7, data: { flags: 32832, components: [{
                 type: 17, accent_color: 15548997,
                 components: [
                     { type: 10, content: '# ⛔ Sem permissão\nTu não tem o cargo necessário pra agendar cobertura.' }

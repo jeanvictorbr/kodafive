@@ -32,7 +32,7 @@ module.exports = {
         }
 
         await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
-            body: { type: 7, data: { flags: 64, components: [{
+            body: { type: 7, data: { flags: 32832, components: [{
                 type: 17, accent_color: 4437377,
                 components: [
                     { type: 10, content: `# ✅ Suave!\n<@${userId}> tá na ativa como **${cargo}** desde agora.` },

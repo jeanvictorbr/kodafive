@@ -114,6 +114,35 @@ async function iniciarBanco() {
         await pool.query(`ALTER TABLE recrutamento ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'pendente';`);
         await pool.query(`ALTER TABLE recrutamento ADD COLUMN IF NOT EXISTS data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP;`);
 
+        // 7. Perfil / XP dos Membros
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS membros (
+                id SERIAL PRIMARY KEY,
+                guild_id VARCHAR(255) NOT NULL,
+                user_id VARCHAR(255) NOT NULL,
+                xp INT DEFAULT 0,
+                nivel INT DEFAULT 1,
+                data_entrada TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(guild_id, user_id)
+            );
+        `);
+
+        // 8. Tribunal do Crime
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS conduta (
+                id SERIAL PRIMARY KEY,
+                guild_id VARCHAR(255) NOT NULL,
+                user_id VARCHAR(255) NOT NULL,
+                tipo VARCHAR(50) NOT NULL,
+                motivo TEXT NOT NULL,
+                valor INT DEFAULT 0,
+                duracao_horas INT DEFAULT 0,
+                aplicado_por VARCHAR(255) NOT NULL,
+                ativa BOOLEAN DEFAULT true,
+                data TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
         console.log('[BANCO] Estrutura completa e atualizada com sucesso no PostgreSQL. NADA FOI ZERADO!');
     } catch (error) {
         console.error('[ERRO] Falha ao atualizar o PostgreSQL:', error);

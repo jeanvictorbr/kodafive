@@ -2,9 +2,16 @@ const { pool } = require('../database/db');
 const { Routes } = require('discord.js');
 const { atualizarVitrineFarm } = require('../utils/vitrineFarm');
 const { verificarMetasBatidas } = require('../utils/verificarMetasBatidas');
+const { adicionarXP, podeGanharXP } = require('../utils/xpHelper');
 
 module.exports = async (client, message) => {
     if (message.author.bot) return;
+
+    if (message.channel.type === 0 && podeGanharXP(message.guildId, message.author.id)) {
+        const xp = Math.floor(Math.random() * 4) + 2;
+        await adicionarXP(message.guildId, message.author.id, xp);
+    }
+
     if (message.channel.type !== 1) return;
 
     const result = await pool.query(`
@@ -30,7 +37,10 @@ module.exports = async (client, message) => {
         [imageAttachment.url, delivery.id]
     );
 
-    await message.reply(`✅ **Comprovante registrado!** Sua entrega de \`${delivery.quantidade}x ${delivery.item_nome}\] foi validada com sucesso.`);
+    const xpFarm = Math.floor(delivery.quantidade / 10) + 5;
+    const { xp, nivel } = await adicionarXP(delivery.guild_id, message.author.id, xpFarm);
+
+    await message.reply(`✅ **Comprovante registrado!** Sua entrega de \`${delivery.quantidade}x ${delivery.item_nome}\] foi validada!\n⭐ **+${xpFarm} XP** | Nível **${nivel}**`);
 
     await atualizarVitrineFarm(client, delivery.guild_id);
     await verificarMetasBatidas(client, delivery.guild_id);

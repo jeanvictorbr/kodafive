@@ -1,4 +1,5 @@
 const { pool } = require('../database/db');
+const { isModoGratuito } = require('./vipHelper');
 
 function formatDate(d) {
     if (!d) return '—';
@@ -32,6 +33,7 @@ async function buildPainelDev(client, pagina = 1, guildId = null) {
 
     const totalGuilds = client.guilds.cache.size;
     const vips = (await pool.query('SELECT COUNT(*)::int as total FROM server_config WHERE is_vip = true')).rows[0].total;
+    const modoGratuito = await isModoGratuito();
     const vipsDoados = (await pool.query("SELECT COUNT(*)::int as total FROM server_config WHERE is_vip = true AND vip_origem = 'doacao'")).rows[0].total;
     const keysTotal = (await pool.query('SELECT COUNT(*)::int as total FROM vip_keys')).rows[0].total;
     const keysUsadas = (await pool.query('SELECT COUNT(*)::int as total FROM vip_keys WHERE usos_atual >= usos_max')).rows[0].total;
@@ -86,7 +88,7 @@ async function buildPainelDev(client, pagina = 1, guildId = null) {
             { type: 14, spacing: 1, divider: true },
             {
                 type: 10,
-                content: `### 📊 Visão Geral\n> 🌐 Servidores: **${totalGuilds}** • 💎 VIPs: **${vips}** (🔑 ${vips - vipsDoados} key + 🎁 ${vipsDoados} doação)\n> 🔑 Keys: **${keysDisponiveis}** disponíveis / **${keysUsadas}** esgotadas\n> 📈 Ativações hoje: **${keysAtivadasHoje}** • ⏱ Uptime: **${uptime}**`
+                content: `### 📊 Visão Geral\n> 🌐 Servidores: **${totalGuilds}** • 💎 VIPs: **${vips}** (🔑 ${vips - vipsDoados} key + 🎁 ${vipsDoados} doação)\n> 🔑 Keys: **${keysDisponiveis}** disponíveis / **${keysUsadas}** esgotadas\n> 📈 Ativações hoje: **${keysAtivadasHoje}** • ⏱ Uptime: **${uptime}**\n> 🎉 **Modo Gratuito:** ${modoGratuito ? '✅ ATIVO — Todos os módulos liberados' : '❌ Desativado'}`
             },
             { type: 14, spacing: 1, divider: true },
             {
@@ -122,6 +124,12 @@ async function buildPainelDev(client, pagina = 1, guildId = null) {
                 type: 1,
                 components: [
                     { type: 2, style: 2, custom_id: "btn_dev_keys", label: "🔑 Gerenciar Keys", emoji: { name: "🔑" } }
+                ]
+            },
+            {
+                type: 1,
+                components: [
+                    { type: 2, style: 3, custom_id: "btn_dev_toggle_gratuito", label: modoGratuito ? "🎉 Desligar Modo Gratuito" : "🎉 Ativar Modo Gratuito", emoji: { name: "🎉" } }
                 ]
             },
             { type: 10, content: "*💼 KODA STUDIOS • Central de Controle*" }

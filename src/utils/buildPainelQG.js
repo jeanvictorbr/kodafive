@@ -1,4 +1,5 @@
 const { pool } = require('../database/db');
+const { isModoGratuito } = require('./vipHelper');
 
 const MODULOS_PAG1 = [
     { nome: "### 📋 Gestão da Rapaziada\nRecrutamento, Ponto, Metas de Farm e RH.", id: "btn_modulo_recrutamento", livre: true },
@@ -22,9 +23,13 @@ async function buildPainelQG(interaction, pagina = 1) {
     const config = await pool.query('SELECT is_vip, vip_expira_em FROM server_config WHERE guild_id = $1', [interaction.guildId]);
     const isVip = config.rows[0]?.is_vip || false;
     const vipExpira = config.rows[0]?.vip_expira_em;
+    const modoGratuito = await isModoGratuito();
 
-    let statusTexto = isVip ? '`Plano Patrão (VIP) 💎`' : '`Plano Cria (Grátis)`';
-    if (isVip && vipExpira) {
+    const temVip = isVip || modoGratuito;
+    let statusTexto = temVip ? '`Plano Patrão (VIP) 💎`' : '`Plano Cria (Grátis)`';
+    if (modoGratuito) {
+        statusTexto += '\n> 🎉 **MODO GRATUITO ATIVO** — Todos os módulos liberados!';
+    } else if (isVip && vipExpira) {
         const ts = Math.floor(new Date(vipExpira).getTime() / 1000);
         statusTexto += `\n> 📅 Expira <t:${ts}:R>`;
     } else if (isVip) {
@@ -43,7 +48,7 @@ async function buildPainelQG(interaction, pagina = 1) {
             type: 2, style: 2,
             custom_id: `${m.id}_p${pagina}`,
             label: m.disabled ? (m.label || 'Explorar') : 'Explorar',
-            disabled: m.disabled || (m.vip && !isVip)
+            disabled: m.disabled || (m.vip && !temVip)
         }
     }));
 

@@ -1,6 +1,8 @@
 const { pool } = require('../database/db');
+const { isModoGratuito } = require('./vipHelper');
 
 async function isVip(guildId) {
+    if (await isModoGratuito()) return true;
     const result = await pool.query('SELECT is_vip FROM server_config WHERE guild_id = $1', [guildId]);
     return result.rows[0]?.is_vip || false;
 }

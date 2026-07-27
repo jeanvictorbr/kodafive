@@ -254,6 +254,12 @@ async function iniciarBanco() {
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS canal_plantao_id VARCHAR(255);`);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS plantao_log_id VARCHAR(255);`);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS cargo_plantao_id VARCHAR(255);`);
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS global_config (
+                chave TEXT PRIMARY KEY,
+                valor TEXT NOT NULL DEFAULT ''
+            );
+        `);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS plantao_banner VARCHAR(500) DEFAULT 'https://i.ibb.co/68037k9/banner-placeholder.png';`);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS plantao_desc TEXT DEFAULT 'Organize a escala de serviço da liderança. Garanta que sempre haja um responsável online.';`);
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS plantao_msg_id VARCHAR(255);`);

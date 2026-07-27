@@ -15,7 +15,7 @@ module.exports = {
 
         if (result.rows.length === 0) {
             return client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
-                body: { type: 7, data: { flags: 32832, components: [{
+                body: { type: 4, data: { flags: 32832, components: [{
                     type: 17, accent_color: 15548997,
                     components: [
                         { type: 10, content: '# ⚠️ Tu não tem plantão ativo\nVai no painel e clica em **✅ Assumir Agora** primeiro.' }
@@ -30,11 +30,18 @@ module.exports = {
         const minutos = Math.floor((diffMs % 3600000) / 60000);
         const duracao = `${horas}h ${minutos}min`;
 
-        const config = await pool.query(
-            'SELECT plantao_msg_id, plantao_msg_canal_id FROM server_config WHERE guild_id = $1',
+        const logQuery = await pool.query(
+            'SELECT plantao_log_id, plantao_msg_id, plantao_msg_canal_id FROM server_config WHERE guild_id = $1',
             [guildId]
         );
-        const r = config.rows[0] || {};
+        const r = logQuery.rows[0] || {};
+
+        if (r.plantao_log_id) {
+            const logCanal = interaction.guild.channels.cache.get(r.plantao_log_id);
+            if (logCanal) {
+                await logCanal.send({ content: `🔴 **<@${userId}>** encerrou o plantão (**${cargo}**) — duração: **${duracao}**` }).catch(() => {});
+            }
+        }
 
         if (r.plantao_msg_id && r.plantao_msg_canal_id) {
             const canal = interaction.guild.channels.cache.get(r.plantao_msg_canal_id);
@@ -48,7 +55,7 @@ module.exports = {
         }
 
         await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
-            body: { type: 7, data: { flags: 32832, components: [{
+            body: { type: 4, data: { flags: 32832, components: [{
                 type: 17, accent_color: 15548997,
                 components: [
                     { type: 10, content: `# 🔴 Plantão Encerrado\n<@${userId}> — **${cargo}** — duração: **${duracao}**\n\nValeu pelo tempo de atividade!` }

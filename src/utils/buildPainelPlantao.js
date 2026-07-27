@@ -4,11 +4,12 @@ async function buildPainelPlantao(interaction) {
     const guildId = interaction.guildId;
 
     const cfg = await pool.query(
-        'SELECT canal_plantao_id, plantao_banner, plantao_desc, plantao_msg_id, plantao_msg_canal_id, cargo_plantao_id FROM server_config WHERE guild_id = $1',
+        'SELECT canal_plantao_id, plantao_log_id, plantao_banner, plantao_desc, plantao_msg_id, plantao_msg_canal_id, cargo_plantao_id FROM server_config WHERE guild_id = $1',
         [guildId]
     );
     const r = cfg.rows[0] || {};
     const canalPlantaoId = r.canal_plantao_id || null;
+    const plantaoLogId = r.plantao_log_id || null;
     const cargoPlantaoId = r.cargo_plantao_id || null;
     const banner = r.plantao_banner || 'https://i.ibb.co/68037k9/banner-placeholder.png';
     const descricao = r.plantao_desc || 'Organiza a escala de serviço da liderança.';
@@ -31,47 +32,54 @@ async function buildPainelPlantao(interaction) {
 
     const publicado = msgId && msgCanalId ? `✅ <#${msgCanalId}>` : '❌ Nunca publicado';
 
-    const btns = [
-        { type: 2, style: 2, custom_id: "btn_plantao_config_banner", label: "🖼 Banner", emoji: { name: "🖼" } },
-        { type: 2, style: 2, custom_id: "btn_plantao_config_desc", label: "📝 Descrição", emoji: { name: "📝" } },
-    ];
-
-    const publicarBtns = [];
-    if (canalPlantaoId) {
-        publicarBtns.push(
-            { type: 2, style: 3, custom_id: "btn_plantao_publicar", label: "📢 Publicar Painel", emoji: { name: "📢" } }
-        );
-        if (msgId) {
-            publicarBtns.push(
-                { type: 2, style: 2, custom_id: "btn_plantao_atualizar", label: "🔄 Atualizar", emoji: { name: "🔄" } }
-            );
-        }
-    }
-
     const components = [
         { type: 12, items: [{ media: { url: banner } }] },
         { type: 10, content: `# ⚙️ Config da Escala de Serviço\n${descricao}` },
         { type: 14, spacing: 1, divider: true },
         {
             type: 10,
-            content: `📢 **Canal do painel:** ${canalPlantaoId ? `<#${canalPlantaoId}>` : '*não config*'}\n📋 **Status:** ${publicado}\n🎯 **Cargo permitido:** ${cargoPlantaoId ? `<@&${cargoPlantaoId}>` : '*qualquer um*'}`
+            content: `📢 **Canal do painel:** ${canalPlantaoId ? `<#${canalPlantaoId}>` : '*não config*'}\n📋 **Log das ações:** ${plantaoLogId ? `<#${plantaoLogId}>` : '*não config*'}\n📋 **Status:** ${publicado}\n🎯 **Cargo permitido:** ${cargoPlantaoId ? `<@&${cargoPlantaoId}>` : '*qualquer um*'}`
         },
     ];
 
     if (canaisTexto.length > 0) {
-        components.push({
-            type: 1,
-            components: [{
-                type: 3,
-                custom_id: "config_select_canal_plantao",
-                placeholder: "Canal pra publicar o painel",
-                options: canaisTexto
-            }]
-        });
+        components.push(
+            {
+                type: 1,
+                components: [{
+                    type: 3,
+                    custom_id: "config_select_canal_plantao",
+                    placeholder: "Canal pra publicar o painel",
+                    options: canaisTexto.slice(0, 25)
+                }]
+            },
+            {
+                type: 1,
+                components: [{
+                    type: 3,
+                    custom_id: "config_select_plantao_log",
+                    placeholder: "Canal pra logs de ação",
+                    options: canaisTexto.slice(0, 25)
+                }]
+            }
+        );
     }
 
-    if (btns.length > 0) components.push({ type: 1, components: btns });
-    if (publicarBtns.length > 0) components.push({ type: 1, components: publicarBtns });
+    components.push(
+        {
+            type: 1,
+            components: [
+                { type: 2, style: 2, custom_id: "btn_plantao_config_banner", label: "🖼 Banner", emoji: { name: "🖼" } },
+                { type: 2, style: 2, custom_id: "btn_plantao_config_desc", label: "📝 Descrição", emoji: { name: "📝" } },
+            ]
+        }
+    );
+
+    if (canalPlantaoId) {
+        const pubBtns = [ { type: 2, style: 3, custom_id: "btn_plantao_publicar", label: "📢 Publicar Painel", emoji: { name: "📢" } } ];
+        if (msgId) pubBtns.push({ type: 2, style: 2, custom_id: "btn_plantao_atualizar", label: "🔄 Atualizar", emoji: { name: "🔄" } });
+        components.push({ type: 1, components: pubBtns });
+    }
 
     components.push(
         { type: 14, spacing: 1, divider: true },

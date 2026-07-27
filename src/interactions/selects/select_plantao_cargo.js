@@ -15,17 +15,24 @@ module.exports = {
         );
 
         const config = await pool.query(
-            'SELECT plantao_msg_id, plantao_msg_canal_id FROM server_config WHERE guild_id = $1',
+            'SELECT plantao_log_id, plantao_msg_id, plantao_msg_canal_id FROM server_config WHERE guild_id = $1',
             [guildId]
         );
         const r = config.rows[0] || {};
+
+        if (r.plantao_log_id) {
+            const logCanal = interaction.guild.channels.cache.get(r.plantao_log_id);
+            if (logCanal) {
+                await logCanal.send({ content: `✅ **<@${userId}>** assumiu o plantão como **${cargo}**` }).catch(() => {});
+            }
+        }
 
         if (r.plantao_msg_id && r.plantao_msg_canal_id) {
             const canal = interaction.guild.channels.cache.get(r.plantao_msg_canal_id);
             if (canal) {
                 try {
                     const msg = await canal.messages.fetch(r.plantao_msg_id);
-                    const painel = await buildPlantaoPublico(guildId, userId);
+                    const painel = await buildPlantaoPublico(guildId);
                     await msg.edit({ flags: 32768, components: painel });
                 } catch {}
             }

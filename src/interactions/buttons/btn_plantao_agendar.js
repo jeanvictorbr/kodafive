@@ -6,7 +6,7 @@ module.exports = {
     async execute(client, interaction) {
         await client.rest.post(Routes.interactionCallback(interaction.id, interaction.token), {
             body: {
-                type: 7, data: {
+                type: 4, data: {
                     flags: 32832,
                     components: [{
                         type: 17, accent_color: 3447003,

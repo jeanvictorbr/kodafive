@@ -11,7 +11,7 @@ const BLOCOS = [
     { label: '🌙 21h-00h', inicio: '21:00', fim: '00:00' },
 ];
 
-async function buildPlantaoPublico(guildId, userId = null, isV2 = false) {
+async function buildPlantaoPublico(guildId) {
     const cfg = await pool.query(
         'SELECT plantao_banner, plantao_desc, cargo_plantao_id FROM server_config WHERE guild_id = $1',
         [guildId]
@@ -36,8 +36,7 @@ async function buildPlantaoPublico(guildId, userId = null, isV2 = false) {
     let listaAtivos = '';
     for (const p of ativos.rows) {
         const inicioTs = Math.floor(new Date(p.inicio).getTime() / 1000);
-        const badge = userId && p.user_id === userId ? ' ← vc msm' : '';
-        listaAtivos += `<@${p.user_id}> — **${p.cargo}** desde <t:${inicioTs}:R>${badge}\n`;
+        listaAtivos += `<@${p.user_id}> — **${p.cargo}** desde <t:${inicioTs}:R>\n`;
     }
     if (!listaAtivos) listaAtivos = 'Ninguém na ativa agora.';
 
@@ -47,23 +46,13 @@ async function buildPlantaoPublico(guildId, userId = null, isV2 = false) {
             p => p.hora_inicio === bloco.inicio && p.hora_fim === bloco.fim
         );
         const quem = ocupantes.length > 0
-            ? ocupantes.map(p => {
-                const badge = userId && p.user_id === userId ? ' ← vc' : '';
-                return `<@${p.user_id}> (${p.cargo})${badge}`;
-            }).join(', ')
+            ? ocupantes.map(p => `<@${p.user_id}> (${p.cargo})`).join(', ')
             : 'vago';
         escalaStr += `> **${bloco.label}:** ${quem}\n`;
     }
     if (!escalaStr) escalaStr = '> Nenhum horário agendado ainda.';
 
     const escopo = cargoPlantaoId ? `<@&${cargoPlantaoId}>` : 'Recrutador • Gerente • Liderança';
-
-    function labelCargo(c) {
-        const m = { 'Liderança': '🏛️', 'Recrutador': '📋', 'Gerente': '⚖️' };
-        return `${m[c] || '📌'} ${c}`;
-    }
-
-    const meuPlantaoAtivo = ativos.rows.find(p => p.user_id === userId);
 
     const components = [
         { type: 12, items: [{ media: { url: banner } }] },
@@ -78,7 +67,7 @@ async function buildPlantaoPublico(guildId, userId = null, isV2 = false) {
             components: [
                 { type: 2, style: 3, custom_id: "btn_plantao_iniciar", label: "✅ Assumir Agora", emoji: { name: "✅" } },
                 { type: 2, style: 2, custom_id: "btn_plantao_agendar", label: "📅 Agendar Horário", emoji: { name: "📅" } },
-                ...(meuPlantaoAtivo ? [{ type: 2, style: 4, custom_id: "btn_plantao_finalizar", label: "🔴 Encerrar", emoji: { name: "🔴" } }] : []),
+                { type: 2, style: 4, custom_id: "btn_plantao_finalizar", label: "🔴 Encerrar", emoji: { name: "🔴" } },
             ]
         },
         { type: 10, content: "*📋 KODA STUDIOS • Escala de Serviço*" }

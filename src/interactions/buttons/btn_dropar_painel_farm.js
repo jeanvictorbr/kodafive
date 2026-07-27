@@ -37,7 +37,7 @@ module.exports = {
                         type: 1, 
                         components: [
                             { type: 2, style: 3, custom_id: "btn_abrir_modal_entrega", label: "Registrar Entrega", emoji: { name: "📝" } },
-                            { type: 2, style: 2, custom_id: "btn_ver_progresso_farm", label: "Ranking da Tropa", emoji: { name: "📊" } }
+                            { type: 2, style: 2, custom_id: "btn_ver_progresso_farm", label: "Meu Status", emoji: { name: "📊" } }
                         ]
                     },
                     { type: 14, spacing: 1, divider: true },

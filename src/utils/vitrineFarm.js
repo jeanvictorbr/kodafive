@@ -30,11 +30,7 @@ async function atualizarVitrineFarm(client, guildId) {
             listaMetas = "> *Nenhuma meta ativa no momento. Aguarde a diretoria.*";
         } else {
             for (const m of metas.rows) {
-                // Calcula o total entregue daquele item específico
-                const entregasQuery = await pool.query('SELECT SUM(quantidade) as total FROM entregas_farm WHERE meta_id = $1', [m.id]);
-                const totalEntregue = parseInt(entregasQuery.rows[0].total) || 0;
-                
-                listaMetas += `> **• ${m.item_nome}:** \`${totalEntregue.toLocaleString()} / ${m.meta_quantidade.toLocaleString()} un\`\n`;
+                listaMetas += `> **• ${m.item_nome}:** \`${m.meta_quantidade.toLocaleString()} un\`\n`;
             }
         }
 
@@ -64,7 +60,7 @@ async function atualizarVitrineFarm(client, guildId) {
                             type: 1, 
                             components: [
                                 { type: 2, style: 3, custom_id: "btn_abrir_modal_entrega", label: "Registrar Entrega", emoji: { name: "📝" } },
-                                { type: 2, style: 2, custom_id: "btn_ver_progresso_farm", label: "Ranking da Tropa", emoji: { name: "📊" } }
+                                { type: 2, style: 2, custom_id: "btn_ver_progresso_farm", label: "Meu Status", emoji: { name: "📊" } }
                             ]
                         },
                         { type: 14, spacing: 1, divider: true },

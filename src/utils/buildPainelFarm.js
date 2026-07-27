@@ -63,7 +63,7 @@ async function buildPainelFarm(interaction) {
                     type: 1, // ActionRow 2
                     components: [
                         { type: 2, style: 1, custom_id: "btn_dropar_painel_farm", label: "Dropar Vitrine", emoji: { name: "📦" } },
-                        { type: 2, style: 2, custom_id: "btn_ranking_farm", label: "Ranking da Tropa", emoji: { name: "📊" } },
+                        { type: 2, style: 2, custom_id: "btn_ranking_farm", label: "Meu Status", emoji: { name: "📊" } },
                         { type: 2, style: 2, custom_id: "btn_voltar_gestao", label: "Voltar ao Menu", emoji: { name: "🔙" } }
                     ]
                 },

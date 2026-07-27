@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 
-// Carrega todas as interações (Botões, Modais, Selects) em memória
+// Carrega todas as interações (Botões, sModais, Selects) em memória
 const interactions = new Map();
 const loadInteractions = (dir) => {
     const files = fs.readdirSync(dir);

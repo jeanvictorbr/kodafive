@@ -31,7 +31,7 @@ module.exports = {
                     type: 17,
                     accent_color: 65280,
                     components: [
-                        { type: 10, content: `# ✅ Sincronização Concluída\n> **Total de membros:** \`${resultado.total}\`\n> **Atualizados:** \`${resultado.atualizados}\`\n> **Ignorados (bots):** \`${resultado.ignorados}\`\n> **Erros:** \`${resultado.erros}\`` }
+                        { type: 10, content: `# ✅ Sincronização Concluída\n> **Total de membros:** \`${resultado.total}\`\n> **Atualizados:** \`${resultado.atualizados}\`\n> **Ignorados (bots):** \`${resultado.ignorados}\`\n> **Sem permissão:** \`${resultado.semPermissao}\`\n> **Erros:** \`${resultado.erros}\`` }
                     ]
                 }
             ];

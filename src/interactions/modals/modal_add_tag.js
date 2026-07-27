@@ -1,5 +1,5 @@
 const { pool } = require('../../database/db');
-const { aplicarTag } = require('../../utils/tagHelper');
+const { aplicarTag, getMembers } = require('../../utils/tagHelper');
 const { Routes } = require('discord.js');
 const { buildPainelTags } = require('../../utils/buildPainelTags');
 
@@ -39,7 +39,7 @@ module.exports = {
                 }
             });
 
-            const members = await interaction.guild.members.fetch();
+            const members = await getMembers(interaction.guild);
             let atualizados = 0;
             for (const [id, member] of members) {
                 if (member.user.bot) continue;

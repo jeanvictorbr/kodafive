@@ -7,6 +7,18 @@ function removerTag(nome) {
     return nome.replace(TAG_PATTERN, '').trim();
 }
 
+async function getMembers(guild) {
+    if (guild.members.cache.size > 0) {
+        return guild.members.cache;
+    }
+    try {
+        return await guild.members.fetch();
+    } catch (error) {
+        console.error('[TAG] Erro ao buscar membros via gateway, usando cache:', error.message);
+        return guild.members.cache;
+    }
+}
+
 async function aplicarTag(client, guildId, userId) {
     try {
         const guild = client.guilds.cache.get(guildId) || await client.guilds.fetch(guildId).catch(() => null);
@@ -53,14 +65,13 @@ async function aplicarTag(client, guildId, userId) {
         }
 
         if (novoNome !== nomeAtual) {
-            await member.setNickname(novoNome).catch(err => {
-                console.error(`[TAG] Erro ao alterar nickname de ${userId}:`, err);
-            });
+            await member.setNickname(novoNome).catch(() => {});
             return { aplicado: true, tag, nome: novoNome };
         }
 
         return { aplicado: false, motivo: 'ja_atualizado' };
     } catch (error) {
+        if (error.code === 50013) return { aplicado: false, motivo: 'sem_permissao' };
         console.error('[TAG] Erro em aplicarTag:', error);
         return { aplicado: false, motivo: 'erro' };
     }
@@ -68,20 +79,22 @@ async function aplicarTag(client, guildId, userId) {
 
 async function sincronizarTodos(client, interaction) {
     const guild = interaction.guild;
-    const members = await guild.members.fetch();
+    const members = await getMembers(guild);
     let atualizados = 0;
     let erros = 0;
+    let semPermissao = 0;
     let ignorados = 0;
 
     for (const [id, member] of members) {
         if (member.user.bot) { ignorados++; continue; }
         const result = await aplicarTag(client, guild.id, id);
         if (result.aplicado) atualizados++;
+        if (result.motivo === 'sem_permissao') semPermissao++;
         if (result.motivo === 'erro') erros++;
-        await new Promise(r => setTimeout(r, 200));
+        await new Promise(r => setTimeout(r, 150));
     }
 
-    return { atualizados, erros, ignorados, total: members.size };
+    return { atualizados, erros, semPermissao, ignorados, total: members.size };
 }
 
-module.exports = { aplicarTag, sincronizarTodos, removerTag };
+module.exports = { aplicarTag, sincronizarTodos, removerTag, getMembers };

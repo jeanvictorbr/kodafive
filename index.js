@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { iniciarBanco } = require('./src/database/db.js');
 const { iniciarSchedulerFarm } = require('./src/utils/farmScheduler');
+const { iniciarSchedulerExpurgo } = require('./src/utils/expurgoScheduler');
 
 // Configurando o cliente inquebrável com os Intents necessários
 const client = new Client({
@@ -43,6 +44,8 @@ for (const folder of commandFolders) {
 }
 iniciarSchedulerFarm(client);
 console.log('[SISTEMA] Motor de reset de metas ativado!');
+iniciarSchedulerExpurgo(client);
+console.log('[SISTEMA] Motor de expurgo automático ativado!');
 
 // ==========================================
 // 📂 CARREGADOR DE EVENTOS (Event Handler)

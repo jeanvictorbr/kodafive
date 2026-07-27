@@ -156,6 +156,48 @@ async function iniciarBanco() {
             );
         `);
 
+        // 10. Auto-Resposta (FAQ)
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS auto_resposta (
+                id SERIAL PRIMARY KEY,
+                guild_id VARCHAR(255) NOT NULL,
+                palavra_chave VARCHAR(255) NOT NULL,
+                resposta TEXT NOT NULL,
+                UNIQUE(guild_id, palavra_chave)
+            );
+        `);
+
+        // 11. Alianças & Rivais
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS aliancas (
+                id SERIAL PRIMARY KEY,
+                guild_id VARCHAR(255) NOT NULL,
+                nome VARCHAR(255) NOT NULL,
+                tipo VARCHAR(50) NOT NULL DEFAULT 'alianca',
+                descricao TEXT DEFAULT '',
+                icone_url VARCHAR(500) DEFAULT '',
+                servidor_id VARCHAR(255) DEFAULT '',
+                posicao INT DEFAULT 0
+            );
+        `);
+
+        // 12. Configuração de Expurgo
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS config_expurgo (
+                guild_id VARCHAR(255) PRIMARY KEY,
+                ativo BOOLEAN DEFAULT false,
+                dias_sem_ponto INT DEFAULT 30,
+                dias_sem_farm INT DEFAULT 30,
+                cargo_manter_id VARCHAR(255) DEFAULT '',
+                cargo_remover_id VARCHAR(255) DEFAULT '',
+                cargo_aplicar_id VARCHAR(255) DEFAULT '',
+                canal_log_id VARCHAR(255) DEFAULT '',
+                aviso_dias INT DEFAULT 5
+            );
+        `);
+
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS cargo_alerta_id VARCHAR(255);`);
+
         console.log('[BANCO] Estrutura completa e atualizada com sucesso no PostgreSQL. NADA FOI ZERADO!');
     } catch (error) {
         console.error('[ERRO] Falha ao atualizar o PostgreSQL:', error);

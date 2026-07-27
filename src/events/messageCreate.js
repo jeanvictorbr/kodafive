@@ -12,6 +12,17 @@ module.exports = async (client, message) => {
         await adicionarXP(message.guildId, message.author.id, xp);
     }
 
+    // Auto-Resposta (FAQ)
+    if (message.channel.type === 0) {
+        const palavras = await pool.query('SELECT palavra_chave, resposta FROM auto_resposta WHERE guild_id = $1', [message.guildId]);
+        for (const row of palavras.rows) {
+            if (message.content.toLowerCase().includes(row.palavra_chave.toLowerCase())) {
+                await message.reply(row.resposta).catch(() => {});
+                break;
+            }
+        }
+    }
+
     if (message.channel.type !== 1) return;
 
     const result = await pool.query(`

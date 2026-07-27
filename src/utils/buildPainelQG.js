@@ -51,7 +51,7 @@ async function buildPainelQG(interaction, pagina = 1) {
         type: 17,
         accent_color: 16711680,
         components: [
-            { type: 12, items: [{ media: { url: "https://i.ibb.co/68037k9/banner-placeholder.png" } }] },
+            { type: 12, items: [{ media: { url: "https://i.imgur.com/zm7TxaB.gif" } }] },
             { type: 10, content: `# 💼 QG DO PATRÃO | Central de Gestão\nVisão, chefe! O que vamos adiantar hoje? Escolha a fita aí embaixo.\n\n**Status atual:** ${statusTexto}` },
             { type: 14, spacing: 1, divider: true },
             ...moduleComponents,

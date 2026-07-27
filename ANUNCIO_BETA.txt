@@ -1,0 +1,138 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔥 **KODA BOT — v0.0.1-beta**
+
+*Sistema de Gestão Inteligente para Facções RP*
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 **O QUE É O KODA BOT?**
+
+O bot que centraliza a gestão da sua facção RP no Discord.
+Do recrutamento à escala de serviço, passando por tribunal,
+tags automáticas, bate-ponto e muito mais — tudo num QG
+interativo e moderno (Components V2).
+
+E o melhor: **Freemium**. O plano base já entrega tudo que
+uma facção precisa pra rodar. O plano VIP é pra quem quer
+expandir com módulos extras.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 **MÓDULOS DISPONÍVEIS**
+
+─── Grátis (Plano Cria) ───
+
+✅ **QG do Patrão** — Central de gestão multi-página
+  › Painel interativo com banner, status e navegação
+  › Backup e restore da configuração
+
+✅ **Gestão da Rapaziada (RH)**
+  › Painel público de recrutamento com banner personalizável
+  › Ficha de inscrição com Nome RP, Passaporte e Histórico
+  › Seleção do recrutador responsável
+  › Canal de RH com botões Aprovar/Reprovar
+  › Atribuição automática de cargo + apelido `[TAG] Nome | ID`
+  › Ranking de recrutadores
+
+✅ **Escala de Serviço**
+  › Painel público de cobertura (V2 no canal)
+  › Cobertura agora + escala do dia em blocos de 3h
+  › Assumir plantão com seleção de cargo
+  › Agendar horário futuro (toggle on/off)
+  › Log de ações em canal dedicado
+  › Tudo ephemeral — zero spam no chat
+
+✅ **Tags Automáticas**
+  › Tags por cargo aplicadas no apelido automaticamente
+  › Sincronização em massa
+  › Atualização em tempo real ao mudar de cargo
+  › Prioridade pelo cargo mais alto
+
+✅ **Alerta Geral**
+  › Dispare avisos via DM para toda a facção
+
+✅ **Bate-Ponto**
+  › Registro de entrada/saída com relatório V2
+  › Carga horária contabilizada
+
+✅ **Metas de Farm**
+  › Controle de metas por membro
+
+✅ **Tribunal do Crime**
+  › Multas, cobranças, strikes e XP
+
+─── VIP (Plano Patrão) 💎 ───
+
+💎 **Auto-Resposta (FAQ)**
+  › Palavras-chave com respostas automáticas
+
+💎 **Alianças & Rivais**
+  › Gerencie relações entre facções
+
+💎 **Expurgo Automático**
+  › Remova cargos de membros inativos automaticamente
+
+💎 **Sugestões**
+  › Sistema completo de sugestões com aprovação/recusa
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🛠️ **DIFERENCIAIS TÉCNICOS**
+
+🔹 **Components V2** — Interface moderna nativa do Discord
+🔹 **Multi-guild** — Cada servidor com configuração própria
+🔹 **Ephemeral first** — Ações sem poluir o chat
+🔹 **Sistema de Keys** — Ativação VIP com chaves e validade
+🔹 **3 origens de VIP** — Key, Doação ou Manual
+🔹 **Anti-crash** — O bot não desliga com erros não tratados
+🔹 **Webhook de Logs** — Auditoria completa de eventos
+🔹 **Schedulers inteligentes** — Expurgo, VIP, Lembretes
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 **COMO USAR**
+
+1️⃣ Adicione o bot ao seu servidor
+2️⃣ Use `/kodafive` pra abrir o **QG do Patrão**
+3️⃣ Configure cada módulo pelos painéis
+4️⃣ Pra ativar o VIP, resgate uma chave no próprio QG
+
+> 💡 Todos os módulos gratuitos já estão prontos pra usar.
+> Basta configurar o canal e o cargo no painel de cada um.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💰 **PLANOS**
+
+┌──────────────────────────────┐
+│ 🌱 **Plano Cria (Grátis)**     │
+│ › Todos os módulos acima ✅   │
+│ › Sem limite de membros       │
+│ › Suporte na comunidade       │
+└──────────────────────────────┘
+┌──────────────────────────────┐
+│ 💎 **Plano Patrão (VIP)**     │
+│ › Tudo do Plano Cria ✅       │
+│ › Módulos VIP desbloqueados  │
+│ › Suporte prioritário        │
+│ › Chave vitalícia ou por tempo│
+└──────────────────────────────┘
+
+> 🔑 Para adquirir, entre em contato com a **KODA STUDIOS**
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📢 **BETA TESTERS**
+
+Estamos liberando a beta para facções parceiras.
+Durante a beta, **todos os módulos VIP estão liberados**
+pra testes. Ajude a encontrar bugs, sugerir melhorias
+e moldar o bot junto com a gente.
+
+> 📌 Reporte bugs e sugira features no canal apropriado
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**KODA STUDIOS** — v0.0.1-beta
+*Sistema de Gestão Inteligente*

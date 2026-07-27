@@ -1,69 +1,82 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { pool } = require('../database/db'); // Puxa a conexão do seu banco
+// src/utils/vitrineFarm.js
+const { pool } = require('../database/db');
 
 async function atualizarVitrineFarm(client, guildId) {
     try {
-        // 1. PUXA DO BANCO DE DADOS REAL (NADA DE MEMÓRIA RAM)
-        const query = await pool.query(
-            'SELECT canal_vitrine_id, msg_vitrine_id, meta_atual, meta_total, item_nome, ciclo FROM meta_farm_config WHERE guild_id = $1',
+        // 1. Puxa os IDs do painel e o ciclo global salvos na configuração do servidor
+        const serverConf = await pool.query(
+            'SELECT canal_vitrine_farm, msg_vitrine_farm, ciclo_farm, nome_faccao FROM server_config WHERE guild_id = $1',
             [guildId]
         );
 
-        // Se não tem configuração de vitrine salva no banco, sai quieto
-        if (query.rowCount === 0) return;
+        if (serverConf.rowCount === 0) return;
+        const conf = serverConf.rows[0];
 
-        const dbFarm = query.rows[0];
+        // Se a vitrine não foi dropada ainda, ignora silenciosamente
+        if (!conf.canal_vitrine_farm || !conf.msg_vitrine_farm) return;
 
-        // Se a vitrine não foi dropada ainda (IDs nulos), sai quieto
-        if (!dbFarm.canal_vitrine_id || !dbFarm.msg_vitrine_id) return;
+        // 2. Busca o Canal e a Mensagem
+        const channel = client.channels.cache.get(conf.canal_vitrine_farm) || await client.channels.fetch(conf.canal_vitrine_farm).catch(() => null);
+        if (!channel) return;
 
-        // 2. Busca o Canal e a Mensagem de forma blindada
-        let channel;
-        try {
-            channel = client.channels.cache.get(dbFarm.canal_vitrine_id) || await client.channels.fetch(dbFarm.canal_vitrine_id);
-        } catch (err) { return; }
+        const message = channel.messages.cache.get(conf.msg_vitrine_farm) || await channel.messages.fetch(conf.msg_vitrine_farm).catch(() => null);
+        if (!message) return;
 
-        let message;
-        try {
-            message = channel.messages.cache.get(dbFarm.msg_vitrine_id) || await channel.messages.fetch(dbFarm.msg_vitrine_id);
-        } catch (err) { return; }
+        // 3. Puxa todos os itens da meta e calcula o progresso de cada um
+        const metas = await pool.query('SELECT * FROM meta_farm_config WHERE guild_id = $1 ORDER BY id ASC', [guildId]);
+        
+        let listaMetas = "";
+        if (metas.rows.length === 0) {
+            listaMetas = "> *Nenhuma meta ativa no momento. Aguarde a diretoria.*";
+        } else {
+            for (const m of metas.rows) {
+                // Calcula o total entregue daquele item específico
+                const entregasQuery = await pool.query('SELECT SUM(quantidade) as total FROM entregas_farm WHERE meta_id = $1', [m.id]);
+                const totalEntregue = parseInt(entregasQuery.rows[0].total) || 0;
+                
+                listaMetas += `> **• ${m.item_nome}:** \`${totalEntregue.toLocaleString()} / ${m.meta_quantidade.toLocaleString()} un\`\n`;
+            }
+        }
 
-        // 3. Monta o Payload V2 com os dados QUE VIERAM DO BANCO
+        const guildIcon = message.guild?.iconURL({ extension: 'png', size: 256 }) || "https://i.ibb.co/68037k9/banner-placeholder.png";
+        const cicloAtual = (conf.ciclo_farm || 'semanal').toUpperCase();
+
+        // 4. Monta o Payload V2 Dinâmico
         const payloadV2 = {
             flags: 32768, 
             components: [
                 {
                     type: 17, 
-                    accent_color: 3092790, 
+                    accent_color: 16711680, 
                     components: [
-                        { type: 10, content: "## 🌿 | Progresso do Farm da Facção\n\nAcompanhe a cota atual da quebrada, tropa." },
-                        { type: 14, spacing: 1, divider: true },
-                        { 
-                            type: 10, 
-                            // Puxa as variáveis reais que vieram da query
-                            content: `**Meta Global:** \`${dbFarm.meta_atual} / ${dbFarm.meta_total} ${dbFarm.item_nome}\`\n**Status:** ${dbFarm.ciclo}` 
+                        {
+                            type: 9, 
+                            components: [
+                                { type: 10, content: `# 📦 Central de Entregas | ${conf.nome_faccao}\nAcompanhe a cota atual da quebrada, tropa.` }
+                            ],
+                            accessory: { type: 11, media: { url: guildIcon } }
                         },
-                        { type: 14, spacing: 2, divider: false },
+                        { type: 14, spacing: 1, divider: true },
+                        { type: 10, content: `### 🎯 Progresso Atual (${cicloAtual}):\n${listaMetas}` },
+                        { type: 14, spacing: 1, divider: true },
+                        { type: 10, content: "Clica no botão abaixo para registrar a sua parte no corre." },
                         {
                             type: 1, 
                             components: [
-                                {
-                                    type: 2, 
-                                    style: 1, 
-                                    label: "Meu Progresso",
-                                    custom_id: "btn_ver_progresso_farm",
-                                    emoji: { name: "🎒" }
-                                }
+                                { type: 2, style: 3, custom_id: "btn_abrir_modal_entrega", label: "Registrar Entrega", emoji: { name: "📝" } },
+                                { type: 2, style: 2, custom_id: "btn_ver_progresso_farm", label: "Ranking da Tropa", emoji: { name: "📊" } }
                             ]
-                        }
+                        },
+                        { type: 14, spacing: 1, divider: true },
+                        { type: 10, content: "*💼 KODA STUDIOS • Sistema de Metas Automatizado*" }
                     ]
                 }
             ]
         };
 
-        // 4. Edita a mensagem vitrine
+        // 5. Edita a mensagem vitrine
         await message.edit(payloadV2);
-        console.log(`[SISTEMA] Vitrine do Farm (${guildId}) sincronizada direto do Banco de Dados!`);
+        console.log(`[SISTEMA] Vitrine do Farm (${guildId}) sincronizada com o banco!`);
 
     } catch (error) {
         console.error('[ERRO] Falha ao atualizar vitrine do banco:', error);

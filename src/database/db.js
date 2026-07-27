@@ -15,6 +15,8 @@ async function iniciarBanco() {
                 cargo_aprovado_id VARCHAR(255)
             );
         `);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS canal_vitrine_farm VARCHAR(255);`);
+        await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS msg_vitrine_farm VARCHAR(255);`);
 
         // Injeta as colunas novas de configuração com segurança (Migrations)
         await pool.query(`ALTER TABLE server_config ADD COLUMN IF NOT EXISTS nome_faccao VARCHAR(100) DEFAULT 'Nossa Facção';`);

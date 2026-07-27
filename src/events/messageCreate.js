@@ -1,4 +1,5 @@
 const { pool } = require('../database/db');
+const { Routes } = require('discord.js');
 const { atualizarVitrineFarm } = require('../utils/vitrineFarm');
 const { verificarMetasBatidas } = require('../utils/verificarMetasBatidas');
 
@@ -68,7 +69,9 @@ module.exports = async (client, message) => {
                 }
             ];
 
-            await logChannel.send({ components: logPayload });
+            await client.rest.post(Routes.channelMessages(logChannel.id), {
+                body: { flags: 32768, components: logPayload }
+            });
         }
     }
 };

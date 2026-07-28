@@ -1,6 +1,6 @@
 const { pool } = require('../../database/db');
 const { Routes } = require('discord.js');
-const { buildPainelAliancas } = require('../../utils/buildPainelAliancas');
+const { buildPainelAliancasAdmin } = require('../../utils/buildPainelAliancasAdmin');
 const { vipLiberado } = require('../../utils/vipHelper');
 
 module.exports = {
